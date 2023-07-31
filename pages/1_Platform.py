@@ -195,3 +195,5 @@ if uploaded_file is not None:
         df = pd.concat([X, y], axis=1)
 
         st.dataframe(df)
+    with st.expander('Modelling:', expanded=True):
+        st.write('**Modelling Options:**', class_imbalance)

@@ -2,6 +2,17 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+from st_pages import Page, show_pages, add_page_title
+add_page_title()
+
+show_pages(
+    [
+        Page("streamlit_app.py", "Home", "🏠"),
+        Page("pages/1_Platform.py", "Platform", ":books:"),
+        Page("pages/2_Citation.py", "Citation", ":books:"),
+    ]
+)
+
 st.title('Explainable Artificial Intelligence (xAI)')
 st.image(r'assets/classification.jpg')
 st.markdown('''
