@@ -1,55 +1,55 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
+#from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import LocalOutlierFactor
 from collections import Counter
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import train_test_split, KFold, GridSearchCV
+#from sklearn.model_selection import train_test_split, KFold, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.svm import SVC
-from sklearn.metrics import confusion_matrix
+#from sklearn.model_selection import RandomizedSearchCV
+#from sklearn.ensemble import GradientBoostingClassifier
+#from sklearn.svm import SVC
+#from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import RobustScaler
 from imblearn.over_sampling import SMOTENC
 import io
 import pandas as pd
-from sklearn.model_selection import RepeatedStratifiedKFold
+#from sklearn.model_selection import RepeatedStratifiedKFold
 import fontawesome as fa
-from lightgbm import LGBMClassifier
-import pyreadstat
+#from lightgbm import LGBMClassifier
+#import pyreadstat
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-import base64
+#import base64
 import io
 from imblearn.over_sampling import SMOTE
 import json
-import plotly.figure_factory as ff
-from sklearn.model_selection import train_test_split, KFold, GridSearchCV
+#import plotly.figure_factory as ff
+#from sklearn.model_selection import train_test_split, KFold, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.svm import SVC
+#from sklearn.model_selection import RandomizedSearchCV
+#from sklearn.ensemble import GradientBoostingClassifier
+#from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
-import plotly.graph_objs as go
-import os
-from plotly import tools
+#import plotly.graph_objs as go
+#import os
+#from plotly import tools
 from collections import Counter
-import datetime
+#import datetime
 import fontawesome as fa
-import math
-from sklearn.model_selection import LeaveOneOut
-from sklearn.model_selection import ShuffleSplit
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import cross_val_predict
+#import math
+#from sklearn.model_selection import LeaveOneOut
+#from sklearn.model_selection import ShuffleSplit
+#from sklearn.model_selection import cross_val_score
+#from sklearn.model_selection import cross_val_predict
 import sys
-import sklearn.neighbors._base
-sys.modules['sklearn.neighbors.base'] = sklearn.neighbors._base
-from missingpy import MissForest
+# import sklearn.neighbors._base
+# sys.modules['sklearn.neighbors.base'] = sklearn.neighbors._base
+# from missingpy import MissForest
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
@@ -331,10 +331,10 @@ def transform_features(x, a):
 
     return dff
 
-def missing_forest_impute(x):
-    imputer = MissForest()
-    x = imputer.fit_transform(x,cat_vars=None)
-    return x
+#def missing_forest_impute(x):
+#    imputer = MissForest()
+#    x = imputer.fit_transform(x,cat_vars=None)
+#    return x
 
 
 

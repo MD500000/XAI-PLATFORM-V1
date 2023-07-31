@@ -113,8 +113,8 @@ if uploaded_file is not None:
         st.write('**Missing data:**', m_c)
         if m_c == 'Remove rows with missing values.':
             df = df.dropna()
-        if m_c == 'Let the assignment be made with the Random Forest method.':
-            df = utils.missing_forest_impute(df)
+        #if m_c == 'Let the assignment be made with the Random Forest method.':
+            # df = utils.missing_forest_impute(df)
         
         st.write('**Remove outliers:**', outliers)
         if outliers == 'Yes':
@@ -196,8 +196,8 @@ if uploaded_file is not None:
 
         st.dataframe(df)
     with st.expander('Modelling', expanded=True):
-        st.write('**Choose Model:**')
-        st.multiselect('Select Model', ['Support Vector Machine', 
+        st.write('Choose Model:')
+        model = st.multiselect('Select Model', ['Support Vector Machine', 
                                          'Logistic Regression', 
                                          'Random Forest', 
                                          'Decision Tree', 
@@ -208,6 +208,8 @@ if uploaded_file is not None:
                                          'CatBoost', 
                                          'XgBoost', 
                                          'Multilayer perceptron(MLP)'])
+        
+        st.write('Model', model)
 
         """
         
