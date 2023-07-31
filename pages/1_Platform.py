@@ -209,19 +209,4 @@ if uploaded_file is not None:
                                          'XgBoost', 
                                          'Multilayer perceptron(MLP)'])
         
-        st.write('Model', model)
-
-        """
-        
-        Support Vector Machine
-        Logistic Regression
-        Random Forest
-        Decision Tree
-        LightGBM
-        Gaussian Naive Bayes
-        AdaBoost
-        GradientBoosting
-        CatBoost
-        XgBoost
-        Multilayer perceptron(MLP)
-        """
+        st.write('Models:', ', '.join(model))
