@@ -41,7 +41,7 @@ if uploaded_file is not None:
 
     with col1:
         st.write('Select predictive attributes')
-        pred = st.multiselect('Predictive attributes', cols)
+        pred = st.multiselect('Predictive attributes', cols, default=cols[:-1])
 
     cols = [x for x in cols if x not in pred]
 
@@ -195,5 +195,31 @@ if uploaded_file is not None:
         df = pd.concat([X, y], axis=1)
 
         st.dataframe(df)
-    with st.expander('Modelling:', expanded=True):
-        st.write('**Modelling Options:**', class_imbalance)
+    with st.expander('Modelling', expanded=True):
+        st.write('**Choose Model:**')
+        st.multiselect('Select Model', ['Support Vector Machine', 
+                                         'Logistic Regression', 
+                                         'Random Forest', 
+                                         'Decision Tree', 
+                                         'LightGBM', 
+                                         'Gaussian Naive Bayes', 
+                                         'AdaBoost', 
+                                         'GradientBoosting', 
+                                         'CatBoost', 
+                                         'XgBoost', 
+                                         'Multilayer perceptron(MLP)'])
+
+        """
+        
+        Support Vector Machine
+        Logistic Regression
+        Random Forest
+        Decision Tree
+        LightGBM
+        Gaussian Naive Bayes
+        AdaBoost
+        GradientBoosting
+        CatBoost
+        XgBoost
+        Multilayer perceptron(MLP)
+        """
