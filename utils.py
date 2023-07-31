@@ -32,7 +32,7 @@ from sklearn.ensemble import RandomForestClassifier
 #from sklearn.model_selection import RandomizedSearchCV
 #from sklearn.ensemble import GradientBoostingClassifier
 #from sklearn.svm import SVC
-from sklearn.metrics import confusion_matrix
+# from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
 #import plotly.graph_objs as go
@@ -86,7 +86,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from sklearn import datasets, ensemble, model_selection
 from sklearn.datasets import make_multilabel_classification
-from sklearn.metrics import plot_confusion_matrix
+#from sklearn.metrics import plot_confusion_matrix
 from io import BytesIO
 import sys
 from sklearn.model_selection import RepeatedKFold
