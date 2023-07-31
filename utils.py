@@ -1,55 +1,27 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-#from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import LocalOutlierFactor
 from collections import Counter
 from sklearn.impute import SimpleImputer
-#from sklearn.model_selection import train_test_split, KFold, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-#from sklearn.model_selection import RandomizedSearchCV
-#from sklearn.ensemble import GradientBoostingClassifier
-#from sklearn.svm import SVC
-#from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import RobustScaler
 from imblearn.over_sampling import SMOTENC
 import io
 import pandas as pd
-#from sklearn.model_selection import RepeatedStratifiedKFold
 import fontawesome as fa
-#from lightgbm import LGBMClassifier
-#import pyreadstat
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-#import base64
 import io
 from imblearn.over_sampling import SMOTE
 import json
-#import plotly.figure_factory as ff
-#from sklearn.model_selection import train_test_split, KFold, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-#from sklearn.model_selection import RandomizedSearchCV
-#from sklearn.ensemble import GradientBoostingClassifier
-#from sklearn.svm import SVC
-# from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
-#import plotly.graph_objs as go
-#import os
-#from plotly import tools
 from collections import Counter
-#import datetime
 import fontawesome as fa
-#import math
-#from sklearn.model_selection import LeaveOneOut
-#from sklearn.model_selection import ShuffleSplit
-#from sklearn.model_selection import cross_val_score
-#from sklearn.model_selection import cross_val_predict
 import sys
-# import sklearn.neighbors._base
-# sys.modules['sklearn.neighbors.base'] = sklearn.neighbors._base
-# from missingpy import MissForest
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
@@ -65,7 +37,6 @@ from sklearn.metrics import recall_score
 from sklearn import metrics
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import matthews_corrcoef
-##randomforest
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.tree import DecisionTreeClassifier
@@ -86,7 +57,6 @@ import warnings
 warnings.filterwarnings('ignore')
 from sklearn import datasets, ensemble, model_selection
 from sklearn.datasets import make_multilabel_classification
-#from sklearn.metrics import plot_confusion_matrix
 from io import BytesIO
 import sys
 from sklearn.model_selection import RepeatedKFold
