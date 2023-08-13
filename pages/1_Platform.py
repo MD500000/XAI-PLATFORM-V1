@@ -62,7 +62,7 @@ if uploaded_file is not None:
         m_c = 'No missing values'
         if(missing):
             st.write('Total Missing Values:', utils.null_count(df))
-            m_c = st.radio('(MUST CHOOSE ONE) Missing Value Imputation Method:', 
+            m_c = st.radio('Missing Value Imputation Method:', 
             ['None',
              'Remove rows with missing values', 
             'Let the assignment be made with the Random Forest method.'])
@@ -195,10 +195,11 @@ if uploaded_file is not None:
         df = pd.concat([X, y], axis=1)
 
         st.dataframe(df)
-        
+
     with st.expander('Modelling', expanded=True):
         st.write('Choose Model:')
         model = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
                                                 'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
         
         st.write('Models:', ', '.join(model))
+
