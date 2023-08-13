@@ -195,18 +195,10 @@ if uploaded_file is not None:
         df = pd.concat([X, y], axis=1)
 
         st.dataframe(df)
+        
     with st.expander('Modelling', expanded=True):
         st.write('Choose Model:')
-        model = st.multiselect('Select Model', ['Support Vector Machine', 
-                                         'Logistic Regression', 
-                                         'Random Forest', 
-                                         'Decision Tree', 
-                                         'LightGBM', 
-                                         'Gaussian Naive Bayes', 
-                                         'AdaBoost', 
-                                         'Gradient Boosting', 
-                                         'CatBoost', 
-                                         'XGBoost', 
-                                         'Multilayer Perceptron (MLP)'])
+        model = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
+                                                'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
         
         st.write('Models:', ', '.join(model))
