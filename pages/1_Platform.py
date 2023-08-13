@@ -204,9 +204,9 @@ if uploaded_file is not None:
                                          'LightGBM', 
                                          'Gaussian Naive Bayes', 
                                          'AdaBoost', 
-                                         'GradientBoosting', 
+                                         'Gradient Boosting', 
                                          'CatBoost', 
-                                         'XgBoost', 
-                                         'Multilayer perceptron(MLP)'])
+                                         'XGBoost', 
+                                         'Multilayer Perceptron (MLP)'])
         
         st.write('Models:', ', '.join(model))
