@@ -226,7 +226,7 @@ with tab3:
                                                                 'Repeated Cross Validation', 'Nested Cross Validation'])
             
         with st.expander('Train Test Split', expanded=True):
-            test_size = st.slider('Test size', 0.1, 0.9, 0.5, 0.1)
+            test_size = st.slider('Test size', 0.5, 1.0, 0.8, 0.05)
 
         
         with st.expander('Modelling Options', expanded=True):  

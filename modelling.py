@@ -49,21 +49,58 @@ models = {
 }
 
 models_param_space = {
-    'AdaBoost': AdaBoostClassifier(), 
-    'CatBoost': cb.CatBoostClassifier(), 
+    'AdaBoost': [{'n_estimators': [10, 100,200, 300,500, 700, 900, 1000],
+                 'learning_rate': [0.0001, 0.001,0.03, 0.01, 0.1, 1.0]}],
+
+    'CatBoost': [{'learning_rate': [0.0001, 0.001,0.03, 0.01, 0.1, 1.0], 
+                  'subsample': [0.7,0.9, 1.0], 
+                  'depth': [1,2, 3, 4, 5, 6, 7,8,9,10], 
+                  'iterations': [50,100,200,300,400]}],
+
     'Decision Tree': [{'splitter' : ['best', 'random'],
                        'criterion' : ['gini', 'entropy'],
                        'max_features': ['log2', 'sqrt','auto'],
                        'max_depth': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                        'min_samples_split': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][1:],
-                       'min_samples_leaf': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],}], 
-    'Gaussian Naive Bayes': GaussianNB(), 
-    'Gradient Boosting': GradientBoostingClassifier(), 
-    'LightGBM': LGBMClassifier(), 
-    'Logistic Regression': [{'C' : (np.logspace(-4, 4, 20)),'penalty' : ('l1', 'l2', 'elasticnet', 'none'),'solver' : ('lbfgs','newton-cg','liblinear','sag','saga')}], 
-    'Multilayer Perceptron (MLP)': [{'criterion': ['gini', 'entropy'],'min_samples_leaf': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],'max_depth':  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                           'min_samples_split': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][1:]}], 
-    'Random Forest': MLPClassifier(), 
-    'Support Vector Machine': [{'C':(0.001,0.002,0.005,0.01,0.015,0.02,0.1,1,10,11,15,20),'gamma':(0.0001,0.001,0.002,0.005,0.01,0.015,0.02,0.1,1,10)}], 
-    'XGBoost': XGBClassifier()
+                       'min_samples_leaf': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],}],
+
+    'Gaussian Naive Bayes': [{'var_smoothing': np.logspace(0,-9, num=100)}],
+
+    'Gradient Boosting': [{'n_estimators': [10, 100,200, 300,500, 700, 900, 1000],
+                           'learning_rate': [0.0001, 0.001,0.03, 0.01, 0.1, 1.0],
+                           'subsample': [0.5, 0.7,0.9, 1.0],
+                           'max_depth': [1,2, 3, 4, 5, 6, 7,8,9,10],}],
+
+    'LightGBM': [{'num_leaves': [31, 127,155],
+                  "max_depth" : [1,2, 3, 4, 5, 6, 7,8,9,10],
+                  'min_child_weight': [0.03,0.001,0.01,0.1],
+                  'subsample' : [0.5, 0.7,0.9, 1.0],
+                  "learning_rate" : [0.0001, 0.001,0.03, 0.01, 0.1, 1.0],
+                  "n_estimators" : [10, 100,200, 300,500, 700, 900, 1000]}],
+                   
+    'Logistic Regression': [{'C' : (np.logspace(-4, 4, 20)),
+                             'penalty' : ('l1', 'l2', 'elasticnet', 'none'),
+                             'solver' : ('lbfgs','newton-cg','liblinear','sag','saga')}],
+
+    'Multilayer Perceptron (MLP)': [{'criterion': ['gini', 'entropy'],
+                                     'min_samples_leaf': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                     'max_depth':  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                     'min_samples_split': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][1:]}],
+
+    'Random Forest': [{'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)],
+                       'activation': ['tanh', 'relu', 'logistic'],
+                       'solver': ['sgd', 'adam', 'lbfgs'],
+                       'alpha': [0.0001, 0.05],
+                       'learning_rate': ['constant','adaptive'],
+                       'max_iter': [50, 100, 150,200,300]}],
+
+    'Support Vector Machine': [{'C':(0.001,0.002,0.005,0.01,0.015,0.02,0.1,1,10,11,15,20),
+                                'gamma':(0.0001,0.001,0.002,0.005,0.01,0.015,0.02,0.1,1,10)}],
+
+    'XGBoost': [{'n_estimators': [10, 100,200, 300,500, 700, 900, 1000], 
+                 'learning_rate': [0.0001, 0.001,0.03, 0.01, 0.1, 1.0], 
+                 'subsample': [0.5, 0.7,0.9, 1.0], 
+                 'max_depth': [1,2, 3, 4, 5, 6, 7,8,9,10]}]
 }
+
+# def classify(mode, X, y, )
