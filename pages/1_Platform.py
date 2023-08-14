@@ -244,8 +244,7 @@ with tab3:
             st.write('**Models:**', ', '.join(models))
             st.write('**Hyperparameter Optimization:**', hyperparameter)
             st.write('**Validation Method:**', val)
-            st.write('**Test Size:**', test_size)
-
+            
         model_list = {}
         for model in models:
             if hyperparameter:
