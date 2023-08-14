@@ -232,9 +232,12 @@ with tab3:
         with st.expander('Validation', expanded=True): 
             val = st.radio('Select Validation Method', ['Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
                                                                 'Repeated Cross Validation', 'Nested Cross Validation'])
+            if val == "Holdout":
+                test_size = st.slider('Test size', 0.5, 1.0, 0.8, 0.05)
             
-        with st.expander('Train Test Split', expanded=True):
-            test_size = st.slider('Test size', 0.5, 1.0, 0.8, 0.05)
+            if val == "Repeated Holdout":
+                test_size = st.slider('Test size', 0.5, 1.0, 0.8, 0.05)
+                repeats = st.slider('Repeats', 5, 50, 5, 1)
 
         
         with st.expander('Modelling Options', expanded=True):  
