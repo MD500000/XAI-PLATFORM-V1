@@ -222,7 +222,7 @@ with tab3:
             hyperparameter = st.radio('Hyperparameter Optimization', ['Yes', 'No'])
 
         with st.expander('Validation', expanded=True): 
-            val = st.radio('Select Validation Method', ['None', 'Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
+            val = st.radio('Select Validation Method', ['Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
                                                                 'Repeated Cross Validation', 'Nested Cross Validation'])
             
         with st.expander('Train Test Split', expanded=True):
