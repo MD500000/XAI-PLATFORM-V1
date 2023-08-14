@@ -1,3 +1,4 @@
+from pyexpat import model
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -103,4 +104,5 @@ models_param_space = {
                  'max_depth': [1,2, 3, 4, 5, 6, 7,8,9,10]}]
 }
 
-# def classify(mode, X, y, )
+def get_config(model_name):
+    return models[model_name], models_param_space[model_name]

@@ -6,6 +6,7 @@ import spss_converter
 import tempfile
 import os
 import utils
+import modelling
 
 st.title('XAI Platform')
 
@@ -216,7 +217,7 @@ with tab2:
 with tab3:
     if df is not None:
         with st.expander('Modelling', expanded=True):
-            model = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
+            models = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
                                                     'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
         
             hyperparameter = st.radio('Hyperparameter Optimization', ['Yes', 'No'])
@@ -230,7 +231,14 @@ with tab3:
 
         
         with st.expander('Modelling Options', expanded=True):  
-            st.write('**Models:**', ', '.join(model))
+            st.write('**Models:**', ', '.join(models))
             st.write('**Hyperparameter Optimization:**', hyperparameter)
             st.write('**Validation Method:**', val)
             st.write('**Test Size:**', test_size)
+
+        model_list = {}
+        for model in models:
+            if hyperparameter:
+                m, h = modelling.get_config(model)
+                model_list[model] = (m,h)
+        st.write(model_list)
