@@ -214,17 +214,23 @@ with tab2:
 
 
 with tab3:
-    with st.expander('Modelling', expanded=True):
-        model = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
-                                                'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
-       
-        hyperparameter = st.radio('Hyperparameter Optimization', ['Yes', 'No'])
-    with st.expander('Validation', expanded=True): 
-        val = st.radio('Select Validation Method', ['None', 'Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
-                                                            'Repeated Cross Validation', 'Nested Cross Validation'])
-    
-    with st.expander('Modelling Options', expanded=True):  
-        st.write('**Models:**', ', '.join(model))
-        st.write('**Hyperparameter Optimization:**', hyperparameter)
-        st.write('**Validation Method:**', val)
+    if df is not None:
+        with st.expander('Modelling', expanded=True):
+            model = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
+                                                    'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
+        
+            hyperparameter = st.radio('Hyperparameter Optimization', ['Yes', 'No'])
 
+        with st.expander('Validation', expanded=True): 
+            val = st.radio('Select Validation Method', ['None', 'Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
+                                                                'Repeated Cross Validation', 'Nested Cross Validation'])
+            
+        with st.expander('Train Test Split', expanded=True):
+            test_size = st.slider('Test size', 0.1, 0.9, 0.5, 0.1)
+
+        
+        with st.expander('Modelling Options', expanded=True):  
+            st.write('**Models:**', ', '.join(model))
+            st.write('**Hyperparameter Optimization:**', hyperparameter)
+            st.write('**Validation Method:**', val)
+            st.write('**Test Size:**', test_size)
