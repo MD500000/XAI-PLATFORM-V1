@@ -249,3 +249,11 @@ with tab3:
                 m, h = modelling.get_config(model)
                 model_list[model] = (m,h)
         # st.write(model_list)
+
+with tab4:
+    if df is None:
+            st.write('Please upload a file first.')
+
+with tab5:
+    if df is None:
+            st.write('Please upload a file first.')
