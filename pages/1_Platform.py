@@ -241,4 +241,4 @@ with tab3:
             if hyperparameter:
                 m, h = modelling.get_config(model)
                 model_list[model] = (m,h)
-        st.write(model_list)
+        # st.write(model_list)
