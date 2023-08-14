@@ -72,8 +72,8 @@ with tab2:
                     st.write('Total Missing Values:', utils.null_count(df))
                     m_c = st.radio('Missing Value Imputation Method:', 
                     ['None',
-                    'Remove rows with missing values', 
-                    'Let the assignment be made with the Random Forest method.'])
+                    'Remove rows with missing values', ])
+                    #'Let the assignment be made with the Random Forest method.'])
                 else:
                     st.write('No missing values found.')
             
@@ -99,8 +99,8 @@ with tab2:
                 'Recursive Feature Elimination', 
                 'Based on Extra Trees Classifier',
                 'Based on Random Forest Classifier', 
-                'LASSO', 
-                'Boruta'])
+                'LASSO',])
+                # 'Boruta'])
 
             with st.expander('Class Imbalance Analysis', expanded=True):
                 onehot_list = utils.categ_columns(df)
