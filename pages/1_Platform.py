@@ -15,6 +15,9 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["File Upload", "Data Preprocessing", "Mo
 df = None
 
 with tab1:
+    if df is None:
+            st.write('Please upload a file first.')
+
     uploaded_file = st.file_uploader('Choose a file', 
                                 type=['xls', 'xlsx', 'sav', 'csv', 'txt'])
     
@@ -65,6 +68,8 @@ with tab1:
             class_of_interest = i_c
 
 with tab2:
+        if df is None:
+            st.write('Please upload a file first.')
         if df is not None:        
             with st.expander('Missing Data Analysis Results', expanded=True):
                 missing = utils.has_nulls(df)
@@ -215,6 +220,8 @@ with tab2:
 
 
 with tab3:
+    if df is None:
+        st.write('Please upload a file first.')
     if df is not None:
         with st.expander('Modelling', expanded=True):
             models = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
