@@ -233,18 +233,32 @@ with tab3:
             val = st.radio('Select Validation Method', ['Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
                                                                 'Repeated Cross Validation', 'Nested Cross Validation'])
             if val == "Holdout":
-                test_size = st.slider('Test size', 0.5, 1.0, 0.8, 0.05)
+                train_size = st.slider('Select the training dataset percentage:', 50, 100, 50, 5)
             
             if val == "Repeated Holdout":
-                test_size = st.slider('Test size', 0.5, 1.0, 0.8, 0.05)
-                repeats = st.slider('Repeats', 5, 50, 5, 1)
+                split_size = st.slider('Select split size:', 50, 100, 50, 5)
+                repeats = st.slider('Select the number of repeats:', 5, 50, 5, 1)
+
+            if val == "Stratified K-fold Cross Validation":
+                k_fold = st.slider('Select k-fold:', 2, 10, 2, 1)
+
+            if val == "Leave One Out Cross Validation":
+                pass
+
+            if val == "Repeated Cross Validation":
+                k_fold = st.slider('Select k-fold:', 5, 10, 5, 1)
+                repeats = st.slider('Select the number of repeats:', 5, 10, 5, 1)
+
+            if val == "Nested Cross Validation":
+                inner_k = st.slider('Select inner k-fold:', 5, 10, 5, 1)
+                outer_k = st.slider('Select outer k-fold:', 5, 10, 5, 1)
 
         
         with st.expander('Modelling Options', expanded=True):  
             st.write('**Models:**', ', '.join(models))
             st.write('**Hyperparameter Optimization:**', hyperparameter)
             st.write('**Validation Method:**', val)
-            
+
         model_list = {}
         for model in models:
             if hyperparameter:
