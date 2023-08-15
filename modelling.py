@@ -41,7 +41,7 @@ models = {
     'Decision Tree': DecisionTreeClassifier(), 
     'Gaussian Naive Bayes': GaussianNB(), 
     'Gradient Boosting': GradientBoostingClassifier(), 
-    'LightGBM': LGBMClassifier(), 
+    'LightGBM': LGBMClassifier(objective = 'binary'), 
     'Logistic Regression': LogisticRegression(), 
     'Multilayer Perceptron (MLP)': RandomForestClassifier(), 
     'Random Forest': MLPClassifier(), 
@@ -104,5 +104,21 @@ models_param_space = {
                  'max_depth': [1,2, 3, 4, 5, 6, 7,8,9,10]}]
 }
 
-def get_config(model_name):
-    return models[model_name], models_param_space[model_name]
+val_methods = {
+    'Holdout': None,
+    'Repeated Holdout': None,
+    'Stratified K-fold Cross Validation': None,
+    'Leave One Out Cross Validation': None,
+    'Repeated Cross Validation': None,
+    'Nested Cross Validation': None,
+}
+
+
+def get_model(model_name):
+    return models[model_name]
+
+def get_model_param_space(model_name):
+    return models_param_space[model_name]
+
+def get_val(val_method):
+    return None

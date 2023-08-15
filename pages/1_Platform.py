@@ -261,10 +261,8 @@ with tab3:
 
         model_list = {}
         for model in models:
-            if hyperparameter:
-                m, h = modelling.get_config(model)
-                model_list[model] = (m,h)
-        # st.write(model_list)
+            model_list[model] = modelling.get_model(model).fit(X, y)
+            st.write(model, 'model is created.')
 
 with tab4:
     if df is None:
