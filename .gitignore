@@ -4,3 +4,5 @@ venv/
 pages/1_Platform.py
 sav.py
 catboost_info/
+data.xlsx
+testing.ipynb
