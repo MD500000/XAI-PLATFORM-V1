@@ -1,3 +1,4 @@
+from sklearn.pipeline import make_pipeline
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,7 +7,7 @@ from collections import Counter
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import OrdinalEncoder, RobustScaler
 from imblearn.over_sampling import SMOTENC
 import io
 import pandas as pd
@@ -99,9 +100,6 @@ def numerical_columns(df):
         if pd.api.types.is_numeric_dtype(df[col]):
             numerical_columns.append(col)
     return numerical_columns   
-
-
-
 
 def check_for_outliers(df):
     df = encode_categorical_columns(df)
@@ -213,14 +211,44 @@ def attr(df, X, y, a):
 
     return new_columns
 
+def transform(df, nulls, transformation):
+    if nulls == 'Remove rows with missing values':
+        df = df.dropna()
+    if nulls == 'Most-frequent imputation':
+        imp_mean = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+        df = imp_mean.fit_transform(df)
+
+    categ_columns_ = list(df[categ_columns(df)].columns.values)
+    numerical_columns_ = list(df[numerical_columns(df)].columns.values)
+
+    categ = df[categ_columns_]
+    numerical = df[numerical_columns_]
+
+    transformations = {
+        'Normalization': preprocessing.Normalizer(), 
+        'Min-max Standardization': preprocessing.MinMaxScaler(), 
+        'Standardization': preprocessing.StandardScaler(), 
+        'Robust Standardization': preprocessing.RobustScaler(),
+    }
+    if transformation is not 'None':
+        categ_pipeline = make_pipeline(OrdinalEncoder())
+        numerical_pipeline = make_pipeline(transformations[transformation])
+
+        categ = pd.DataFrame(categ_pipeline.fit_transform(categ), columns=categ_columns_)
+        numerical = pd.DataFrame(numerical_pipeline.fit_transform(numerical), columns=numerical_columns_)
+
+    df = pd.concat([categ, numerical], axis=1)
+
+    return df
+
+
 def transform_features(x, a):
     # data transformation function
-
     try:
         dff = encode_categorical_columns(x)
     except:
         dff =x
-    # dff = kayipveriler(dff)
+
     if a==0:
         normalizer = preprocessing.Normalizer()
         list = []

@@ -1,0 +1,4 @@
+pipeline for dropping outlier
+pipeline for attribute_selection
+add mrmr
+add pipelines for modelling

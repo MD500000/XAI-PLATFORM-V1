@@ -78,8 +78,8 @@ with tab2:
                     st.write('Total Missing Values:', utils.null_count(df))
                     m_c = st.radio('Missing Value Imputation Method:', 
                     ['None',
-                    'Remove rows with missing values', ])
-                    #'Let the assignment be made with the Random Forest method.'])
+                     'Remove rows with missing values', 
+                    'Most-frequent imputation'])
                 else:
                     st.write('No missing values found.')
             
@@ -110,7 +110,7 @@ with tab2:
 
             with st.expander('Class Imbalance Analysis', expanded=True):
                 onehot_list = utils.categ_columns(df)
-                df = utils.encode_categorical_columns(df)
+                #df = utils.encode_categorical_columns(df)
                 class_imbalance = 'None'
                 is_imb = utils.is_imbalance(df[target])
                 if is_imb and len(onehot_list) == 0:
@@ -125,14 +125,10 @@ with tab2:
 
             with st.expander('Preprocessing Pipeline', expanded=True):
                 st.write('**Missing data:**', m_c)
-                if m_c == 'Remove rows with missing values.':
-                    df = df.dropna()
-                #if m_c == 'Let the assignment be made with the Random Forest method.':
-                    # df = utils.missing_forest_impute(df)
                 
                 st.write('**Remove outliers:**', outliers)
-                if outliers == 'Yes':
-                    df = utils.drop_outliers(df)
+                #if outliers == 'Yes':
+                    #df = utils.drop_outliers(df)
                 
                 new_columns = df.columns[:-1]
                 st.write('**Attribute selection method:**', attribute_selection)
@@ -142,21 +138,13 @@ with tab2:
                 
                 st.write('**Data transformation:**', transformations)
                 if transformations == 'Normalization':
-                    df = df.dropna()
-                    transformed_x = utils.transform_features(df[list(new_columns)], 0)
-                    df = pd.concat([transformed_x, df[target]], axis=1)
+                    df = utils.transform(df, m_c, transformations)
                 if transformations == 'Min-max Standardization':
-                    df = df.dropna()
-                    transformed_x = utils.transform_features(df[list(new_columns)], 1)
-                    df = pd.concat([transformed_x, df[target]], axis=1)
+                    df = utils.transform(df, m_c, transformations)
                 if transformations == 'Standardization':
-                    df = df.dropna()
-                    transformed_x = utils.transform_features(df[list(new_columns)], 2)
-                    df = pd.concat([transformed_x, df[target]], axis=1)
+                    df = utils.transform(df, m_c, transformations)
                 if transformations == 'Robust Standardization':
-                    df = df.dropna()
-                    transformed_x = utils.transform_features(df[list(new_columns)], 3)
-                    df = pd.concat([transformed_x, df[target]], axis=1)
+                    df = utils.transform(df, m_c, transformations)
                 
                 target_col = df[target]
                 if attribute_selection == 'Recursive Feature Elimination':
