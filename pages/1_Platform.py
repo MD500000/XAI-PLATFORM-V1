@@ -61,11 +61,27 @@ with tab1:
                 
             with col3:
                 st.write('Select the class of interest')
-                i_c = st.selectbox('Class of interest', df[target].unique().tolist())
+                i_c = st.selectbox('Class of interest', df[target].dropna().unique().tolist())
 
 
             new_df = df[pred + [target]]
+            x = df[pred]
+            y = df[target]
             class_of_interest = i_c
+
+            with st.expander('Data Information', expanded=True):
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write('**Number of Instances:**', df.shape[0])
+                    st.write('**Number of Predictive Attributes:**', len(pred))
+                    st.write('**Number of Target Attributes:**', len([target]))
+                    
+                with col2:
+                    st.write('**Number of Attributes:**', df.shape[1])
+                    st.write('**Number of Classes:**', len(df[target].dropna().unique().tolist()))
+                    st.write('**Class of Interest:**', i_c)
+
+            
 
 with tab2:
         if df is None:
@@ -105,8 +121,8 @@ with tab2:
                 'Recursive Feature Elimination', 
                 'Based on Extra Trees Classifier',
                 'Based on Random Forest Classifier', 
-                'LASSO',])
-                # 'Boruta'])
+                'LASSO',
+                'mRMR (minimum Redundancy - Maximum Relevance)'])
 
             with st.expander('Class Imbalance Analysis', expanded=True):
                 onehot_list = utils.categ_columns(df)
