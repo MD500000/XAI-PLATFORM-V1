@@ -1,3 +1,4 @@
+from regex import R
 from sklearn.pipeline import make_pipeline
 import streamlit as st
 import pandas as pd
@@ -15,7 +16,7 @@ import fontawesome as fa
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 import io
-from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import SMOTE, RandomOverSampler
 import json
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -119,14 +120,10 @@ def check_for_outliers(df):
 
 
 def is_imbalance(y):
-    # count the frequency of each class
-    count = Counter(y)
-    aa=list(count.values())
-    deger = False
-    for i in range(len(aa)-1):
-        if aa[i] >= (3*aa[i+1]) or 3*aa[i] <= aa[i+1]:
-            deger=True
-    return deger
+    value_c = list(y.value_counts())
+    if value_c[0] >= (3*value_c[1]) or 3*value_c[0] <= value_c[1]:
+        return True
+    return False
 
 
 def impute_missing(df):
@@ -338,17 +335,25 @@ def transform_features(x, a):
 
 def smote_function(df,X,y, a):
 
-    X =  X.to_numpy()
+    #X =  X.to_numpy()
 
-    categorical_features = np.argwhere(np.array([len(set(X[:,x])) for x in range(X.shape[1])]) <= 9).flatten()
+    categorical_features = np.argwhere(np.array([len(set(X.iloc[:,x])) for x in range(X.shape[1])]) <= 9).flatten()
     ##normalde buradaki <=10 du, bu haliyle bazı sayısalları kategorik yapıyor veya cinsiyeti kategorik görmüyor vs, bağlanıp bakmamız gerek aslında
 
     if a==0:
-        sm = SMOTE()
-        X, y = sm.fit_resample(X, y)
+        try:
+            sm = SMOTE()
+            X, y = sm.fit_resample(X, y)
+        except:
+            ros = RandomOverSampler()
+            X, y = ros.fit_resample(X, y)
     elif a==1:
-        sm = SMOTETomek(sampling_strategy='not majority')
-        X, y = sm.fit_resample(X, y)
+        try:
+            sm = SMOTETomek()
+            X, y = sm.fit_resample(X, y)
+        except:
+            ros = RandomOverSampler(sampling_strategy='not majority')
+            X, y = ros.fit_resample(X, y)
 
     elif a==3 and len(categorical_features) !=0:
         sm = SMOTENC(categorical_features=categorical_features, sampling_strategy='not majority')
