@@ -136,10 +136,13 @@ with tab2:
                 'mRMR (minimum Redundancy - Maximum Relevance)'])
 
             with st.expander('Preprocessing Pipeline', expanded=True):
+                new_df_ = new_df.copy()
                 st.write('**Missing data:**', m_c)
                 if m_c == 'Remove rows with missing values':
+                    new_df = new_df_ 
                     new_df = new_df.dropna()
                 if m_c == 'Most-frequent imputation':
+                    new_df = new_df_
                     new_df = utils.simple_imputer(new_df)
 
                 categ_columns = utils.categ_columns(new_df)
