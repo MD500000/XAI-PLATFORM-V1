@@ -105,7 +105,7 @@ def numerical_columns(df):
 def check_for_outliers(df):
     df = encode_categorical_columns(df)
     df = df.dropna()
-    
+
     numeric_columns = numerical_columns(df)
     if not numeric_columns:
         return []
@@ -125,46 +125,13 @@ def is_imbalance(y):
         return True
     return False
 
-
-def impute_missing(df):
-    # missing data
-    cols = df.columns
-    def cleanveri(veri):
-        try:
-            veri = float(veri)
-        except:
-            veri = veri
-        if isinstance(veri, str):
-            return np.nan
-        elif isinstance(veri, float):
-            return veri
-    for i in df.columns:
-        df[i] = df[i].apply(lambda x : cleanveri(x))
-
-    #df = df.to_numpy()
-    imp_mean = SimpleImputer(missing_values=np.nan, strategy='mean' )
-    imp_mean.fit(df)
-    df = pd.DataFrame(imp_mean.transform(df))
-    df.columns = cols
-    return df
-
-def drop_outliers(x):
-    
-    dff = encode_categorical_columns(x)
-    dff = impute_missing(dff)
-
+def drop_outliers(df):
     lof = LocalOutlierFactor()
-    yhat = lof.fit_predict(dff)
+    yhat = lof.fit_predict(df)
     mask = yhat != -1 ##yine burada aykırı değer içeren satırları bulduk
-    aykirideger= 0
-    aykiridegerlist=[]
-    for i in range(len(mask)):
-        if mask[i] != True:
-            aykirideger = aykirideger+1
-            aykiridegerlist.append(i)
-    x = x.drop(aykiridegerlist, axis=0)
-    x = x.reset_index(drop=True)
-    return x  
+    df = df.iloc[mask,:]
+    df = df.reset_index(drop=True)
+    return df
 
 def attr(df, X, y, a):
     if a==0:
@@ -208,18 +175,16 @@ def attr(df, X, y, a):
 
     return new_columns
 
-def transform(df, nulls, transformation):
-    if nulls == 'Remove rows with missing values':
-        df = df.dropna()
-    if nulls == 'Most-frequent imputation':
-        imp_mean = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
-        df = imp_mean.fit_transform(df)
+def simple_imputer(df):
+    cols = list(df.columns.values)
+    imp_mean = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+    df = pd.DataFrame(imp_mean.fit_transform(df), columns=cols)
+    return df
 
-    categ_columns_ = list(df[categ_columns(df)].columns.values)
-    numerical_columns_ = list(df[numerical_columns(df)].columns.values)
+def transform(df, categ_columns, numerical_columns, transformation):
 
-    categ = df[categ_columns_]
-    numerical = df[numerical_columns_]
+    categ = df[categ_columns]
+    numerical = df[numerical_columns]
 
     transformations = {
         'Normalization': preprocessing.Normalizer(), 
@@ -228,11 +193,8 @@ def transform(df, nulls, transformation):
         'Robust Standardization': preprocessing.RobustScaler(),
     }
     if transformation is not 'None':
-        categ_pipeline = make_pipeline(OrdinalEncoder())
         numerical_pipeline = make_pipeline(transformations[transformation])
-
-        categ = pd.DataFrame(categ_pipeline.fit_transform(categ), columns=categ_columns_)
-        numerical = pd.DataFrame(numerical_pipeline.fit_transform(numerical), columns=numerical_columns_)
+        numerical = pd.DataFrame(numerical_pipeline.fit_transform(numerical), columns=numerical_columns)
 
     df = pd.concat([categ, numerical], axis=1)
 
@@ -333,10 +295,7 @@ def transform_features(x, a):
 
 
 
-def smote_function(df,X,y, a):
-
-    #X =  X.to_numpy()
-
+def smote_function(X,y, a):
     categorical_features = np.argwhere(np.array([len(set(X.iloc[:,x])) for x in range(X.shape[1])]) <= 9).flatten()
     ##normalde buradaki <=10 du, bu haliyle bazı sayısalları kategorik yapıyor veya cinsiyeti kategorik görmüyor vs, bağlanıp bakmamız gerek aslında
 
@@ -355,12 +314,22 @@ def smote_function(df,X,y, a):
             ros = RandomOverSampler(sampling_strategy='not majority')
             X, y = ros.fit_resample(X, y)
 
-    elif a==3 and len(categorical_features) !=0:
-        sm = SMOTENC(categorical_features=categorical_features, sampling_strategy='not majority')
-        X, y = sm.fit_resample(X, y)
-    elif a==3 and len(categorical_features) ==0:
-        sm = SMOTE()
-        X, y = sm.fit_resample(X, y)
+    elif a==2 and len(categorical_features) !=0:
+        try:
+            sm = SMOTENC(categorical_features=categorical_features, 
+                        sampling_strategy='not majority')
+            X, y = sm.fit_resample(X, y)
+        except:
+            ros = RandomOverSampler(sampling_strategy='not majority')
+            X, y = ros.fit_resample(X, y)
+
+    elif a==2 and len(categorical_features) ==0:
+        try:
+            sm = SMOTE()
+            X, y = sm.fit_resample(X, y)
+        except:
+            ros = RandomOverSampler()
+            X, y = ros.fit_resample(X, y)
 
 
     return X,y

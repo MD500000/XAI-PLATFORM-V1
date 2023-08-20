@@ -13,6 +13,7 @@ st.title('XAI Platform')
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["File Upload", "Data Preprocessing", "Modelling", "LIME", "SHAP"])
 
 df = None
+new_df = None
 
 with tab1:
     if df is None:
@@ -45,62 +46,72 @@ with tab1:
 
         st.subheader('Data preview')
         if df is not None:
-            st.dataframe(df)
             cols = df.columns.tolist()
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-                st.write('Select predictive attributes')
-                pred = st.multiselect('Predictive attributes', cols, default=cols[:-1])
+            
+            st.write('Select predictive attributes')
+            pred = st.multiselect('Predictive attributes', cols, default=cols[:-1])
 
             cols = [x for x in cols if x not in pred]
-
-            with col2:
+            col1, col2 = st.columns(2)
+            with col1:
                 st.write('Select target/output attribute')
                 target = st.selectbox('Target attribute', cols)
                 
-            with col3:
+            with col2:
                 st.write('Select the class of interest')
                 i_c = st.selectbox('Class of interest', df[target].dropna().unique().tolist())
 
-
             new_df = df[pred + [target]]
-            x = df[pred]
-            y = df[target]
             class_of_interest = i_c
 
             with st.expander('Data Information', expanded=True):
+                st.dataframe(new_df)
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.write('**Number of Instances:**', df.shape[0])
+                    st.write('**Number of Instances:**', new_df.shape[0])
                     st.write('**Number of Predictive Attributes:**', len(pred))
                     st.write('**Number of Target Attributes:**', len([target]))
                     
                 with col2:
-                    st.write('**Number of Attributes:**', df.shape[1])
-                    st.write('**Number of Classes:**', len(df[target].dropna().unique().tolist()))
+                    st.write('**Number of Attributes:**', new_df.shape[1])
+                    st.write('**Number of Classes:**', len(new_df[target].dropna().unique().tolist()))
                     st.write('**Class of Interest:**', i_c)
 
             
 
+            
+
 with tab2:
-        if df is None:
+        if new_df is None:
             st.write('Please upload a file first.')
-        if df is not None:        
+        if new_df is not None:        
             with st.expander('Missing Data Analysis Results', expanded=True):
-                missing = utils.has_nulls(df)
+                missing = utils.has_nulls(new_df)
                 m_c = 'No missing values'
                 if(missing):
-                    st.write('Total Missing Values:', utils.null_count(df))
+                    st.write('Total Missing Values:', utils.null_count(new_df))
                     m_c = st.radio('Missing Value Imputation Method:', 
-                    ['None',
-                     'Remove rows with missing values', 
+                    ['Remove rows with missing values', 
                     'Most-frequent imputation'])
                 else:
                     st.write('No missing values found.')
             
+            with st.expander('Class Imbalance Analysis', expanded=True):
+                onehot_list = utils.categ_columns(new_df)
+                #df = utils.encode_categorical_columns(df)
+                class_imbalance = 'None'
+                is_imb = utils.is_imbalance(new_df[target])
+                if is_imb and len(onehot_list) == 0:
+                    class_imbalance = st.radio('There is a class imbalance problem in the dataset. Select one of the following methods to resolve the class imbalance problem.',
+                    ['None','SMOTE','SMOTETomek'])
+                elif is_imb and len(onehot_list) != 0:
+                    class_imbalance = st.radio('There is a class imbalance problem in the dataset. Select one of the following methods to resolve the class imbalance problem.',
+                    ['None','SMOTE-NC'])
+                else:
+                    st.write('There is no class imbalance problem in the dataset.')
+            
             with st.expander('Outlier Value Analysis Result', expanded=True):
-                if utils.check_for_outliers(df) == 0:
+                if utils.check_for_outliers(new_df) == 0:
                     outliers = 'No outliers'
                     st.write('No outlier values were detected in the data set.')
                 else:
@@ -124,102 +135,127 @@ with tab2:
                 'LASSO',
                 'mRMR (minimum Redundancy - Maximum Relevance)'])
 
-            with st.expander('Class Imbalance Analysis', expanded=True):
-                onehot_list = utils.categ_columns(df)
-                #df = utils.encode_categorical_columns(df)
-                class_imbalance = 'None'
-                is_imb = utils.is_imbalance(df[target])
-                if is_imb and len(onehot_list) == 0:
-                    class_imbalance = st.radio('There is a class imbalance problem in the dataset. Select one of the following methods to resolve the class imbalance problem.',
-                    ['None','SMOTE','SMOTETomek'])
-                elif is_imb and len(onehot_list) != 0:
-                    class_imbalance = st.radio('There is a class imbalance problem in the dataset. Select one of the following methods to resolve the class imbalance problem.',
-                    ['None','SMOTE-NC'])
-                else:
-                    st.write('There is no class imbalance problem in the dataset.')
-
-
             with st.expander('Preprocessing Pipeline', expanded=True):
                 st.write('**Missing data:**', m_c)
-                
-                st.write('**Remove outliers:**', outliers)
-                #if outliers == 'Yes':
-                    #df = utils.drop_outliers(df)
-                
-                new_columns = df.columns[:-1]
-                st.write('**Attribute selection method:**', attribute_selection)
-                if attribute_selection == 'None':
-                    new_columns = df.columns[:-1]
+                if m_c == 'Remove rows with missing values':
+                    new_df = new_df.dropna()
+                if m_c == 'Most-frequent imputation':
+                    new_df = utils.simple_imputer(new_df)
 
-                
-                st.write('**Data transformation:**', transformations)
-                if transformations == 'Normalization':
-                    df = utils.transform(df, m_c, transformations)
-                if transformations == 'Min-max Standardization':
-                    df = utils.transform(df, m_c, transformations)
-                if transformations == 'Standardization':
-                    df = utils.transform(df, m_c, transformations)
-                if transformations == 'Robust Standardization':
-                    df = utils.transform(df, m_c, transformations)
-                
-                target_col = df[target]
-                if attribute_selection == 'Recursive Feature Elimination':
-                    df = df.dropna()
-                    new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 0)
-                    df = df[new_columns]
-                    df = pd.concat([df, target_col], axis=1)
-                    st.write('**Important Attributes:**', ', '.join(new_columns))
-                if attribute_selection == 'Based on Extra Trees Classifier':
-                    df = df.dropna()
-                    new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 1)
-                    df = df[new_columns]
-                    df = pd.concat([df, target_col], axis=1)
-                    st.write('**Important Attributes:**', ', '.join(new_columns))
-                if attribute_selection == 'Based on Random Forest Classifier':
-                    df = df.dropna()
-                    new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 2)
-                    df = df[new_columns]
-                    df = pd.concat([df, target_col], axis=1)
-                    st.write('**Important Attributes:**', ', '.join(new_columns))
-                if attribute_selection == 'LASSO':
-                    df = df.dropna()
-                    new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 3)
-                    df = df[new_columns]
-                    df = pd.concat([df, target_col], axis=1)
-                    st.write('**Important Attributes:**', ', '.join(new_columns))
-                if attribute_selection == 'Boruta':
-                    df = df.dropna()
-                    new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 4)
-                    df = df[new_columns]
-                    df = pd.concat([df, target_col], axis=1)
-                    st.write('**Important Attributes:**', ', '.join(new_columns))
+                categ_columns = utils.categ_columns(new_df)
+                numerical_columns = utils.numerical_columns(new_df)
 
-                columns_ = df.columns
-                X, y = df.drop([target], axis=1), df[target]
-                df = pd.concat([X, y], axis=1)
+                encoded_df = utils.encode_categorical_columns(new_df)
+
+                X, y = encoded_df.drop([target], axis=1), encoded_df[target]
 
                 if class_imbalance != 'None':
                     st.write('**Class imbalance handling strategy:**', class_imbalance)
-                    df = df.dropna()
                     if class_imbalance == 'SMOTE':
-                        X, y = utils.smote_function(df, df.drop([target], axis=1), df[target], 0)
+                        X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], 0)
                     if class_imbalance == 'SMOTETomek':
-                        X, y = utils.smote_function(df, df.drop([target], axis=1), df[target], 1)
+                        X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], 1)
                     if class_imbalance == 'SMOTE-NC':
-                        X, y = utils.smote_function(df, df.drop([target], axis=1), df[target], 2)
+                        X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], 2)
 
-                columns_ = df.columns
-                X, y = df.drop([target], axis=1), df[target]
-                df = pd.concat([X, y], axis=1)
+                balanced_df = pd.concat([X, y], axis=1)
+                
+                st.write('**Remove outliers:**', outliers)
+                if outliers == 'Yes':
+                     balanced_df = utils.drop_outliers(balanced_df)
 
-                st.dataframe(df)
+                X, y = balanced_df.drop([target], axis=1), balanced_df[target]
 
-                csv = df.to_csv().encode('utf-8')
-                st.download_button(
-                label="Download Preprocessed Data",
-                data=csv,
-                file_name=f'{file_name.split(".")[0]}_preprocessed.csv',
-                mime='text/csv')
+                new_columns = X.columns[:-1]
+                st.write('**Attribute selection method:**', attribute_selection)
+                if attribute_selection == 'None':
+                    new_columns = cols
+
+                categ_columns = utils.categ_columns(X)
+                numerical_columns = utils.numerical_columns(X)
+                
+                st.write('**Data transformation:**', transformations)
+                if transformations == 'Normalization':
+                    X = utils.transform(X, categ_columns, numerical_columns, transformations)
+                if transformations == 'Min-max Standardization':
+                    X = utils.transform(X, categ_columns, numerical_columns, transformations)
+                if transformations == 'Standardization':
+                    X = utils.transform(X, categ_columns, numerical_columns, transformations)
+                if transformations == 'Robust Standardization':
+                    X = utils.transform(X, categ_columns, numerical_columns, transformations)
+
+                transformed_df = pd.concat([X, y], axis=1)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write('**Number of Instances:**', transformed_df.shape[0])
+                    st.write('**Number of Predictive Attributes:**', len(pred))
+                    st.write('**Number of Target Attributes:**', len([target]))
+                    
+                with col2:
+                    st.write('**Number of Attributes:**', transformed_df.shape[1])
+                    st.write('**Number of Classes:**', len(transformed_df[target].dropna().unique().tolist()))
+                    st.write('**Class of Interest:**', i_c)
+
+                try:
+                    st.dataframe(transformed_df)
+                except:
+                    st.write("Make sure you've secured your entire pipeline.")
+
+
+                
+                
+                
+                # target_col = df[target]
+                # if attribute_selection == 'Recursive Feature Elimination':
+                #     df = df.dropna()
+                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 0)
+                #     df = df[new_columns]
+                #     df = pd.concat([df, target_col], axis=1)
+                #     st.write('**Important Attributes:**', ', '.join(new_columns))
+                # if attribute_selection == 'Based on Extra Trees Classifier':
+                #     df = df.dropna()
+                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 1)
+                #     df = df[new_columns]
+                #     df = pd.concat([df, target_col], axis=1)
+                #     st.write('**Important Attributes:**', ', '.join(new_columns))
+                # if attribute_selection == 'Based on Random Forest Classifier':
+                #     df = df.dropna()
+                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 2)
+                #     df = df[new_columns]
+                #     df = pd.concat([df, target_col], axis=1)
+                #     st.write('**Important Attributes:**', ', '.join(new_columns))
+                # if attribute_selection == 'LASSO':
+                #     df = df.dropna()
+                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 3)
+                #     df = df[new_columns]
+                #     df = pd.concat([df, target_col], axis=1)
+                #     st.write('**Important Attributes:**', ', '.join(new_columns))
+                # if attribute_selection == 'Boruta':
+                #     df = df.dropna()
+                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 4)
+                #     df = df[new_columns]
+                #     df = pd.concat([df, target_col], axis=1)
+                #     st.write('**Important Attributes:**', ', '.join(new_columns))
+
+                # columns_ = df.columns
+                # X, y = df.drop([target], axis=1), df[target]
+                # df = pd.concat([X, y], axis=1)
+
+                
+
+                # columns_ = df.columns
+                # X, y = df.drop([target], axis=1), df[target]
+                # df = pd.concat([X, y], axis=1)
+
+                # st.dataframe(df)
+
+                # csv = df.to_csv().encode('utf-8')
+                # st.download_button(
+                # label="Download Preprocessed Data",
+                # data=csv,
+                # file_name=f'{file_name.split(".")[0]}_preprocessed.csv',
+                # mime='text/csv')
 
 
 
