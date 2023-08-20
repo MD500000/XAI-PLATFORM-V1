@@ -14,6 +14,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["File Upload", "Data Preprocessing", "Mo
 
 df = None
 new_df = None
+preprocessed_df = None
 
 with tab1:
     if df is None:
@@ -63,6 +64,9 @@ with tab1:
 
             new_df = df[pred + [target]]
             class_of_interest = i_c
+
+            categ_columns = [x for x in utils.categ_columns(new_df) if x not in [target]]
+            numerical_columns = [x for x in utils.numerical_columns(new_df) if x not in [target]]
 
             with st.expander('Data Information', expanded=True):
                 st.dataframe(new_df)
@@ -145,39 +149,46 @@ with tab2:
                     new_df = new_df_
                     new_df = utils.simple_imputer(new_df)
 
-                categ_columns = utils.categ_columns(new_df)
-                numerical_columns = utils.numerical_columns(new_df)
-
                 encoded_df = utils.encode_categorical_columns(new_df)
 
                 X, y = encoded_df.drop([target], axis=1), encoded_df[target]
-                X_, y_ = X, y
+                X_, y_ = X.copy(), y.copy()
                 if class_imbalance != 'None':
                     st.write('**Class imbalance handling strategy:**', class_imbalance)
                     X, y = X_, y_
                     X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], class_imbalance)
 
                 balanced_df = pd.concat([X, y], axis=1)
+                balanced_df_ = balanced_df.copy()
                 
                 st.write('**Remove outliers:**', outliers)
                 if outliers == 'Yes':
                      balanced_df = utils.drop_outliers(balanced_df)
+                if outliers == 'No':
+                    balanced_df = balanced_df_
 
                 X, y = balanced_df.drop([target], axis=1), balanced_df[target]
 
-                new_columns = X.columns[:-1]
+                new_columns = X.columns
                 st.write('**Attribute selection method:**', attribute_selection)
                 if attribute_selection == 'None':
                     new_columns = cols
-
-                categ_columns = utils.categ_columns(X)
-                numerical_columns = utils.numerical_columns(X)
                 
                 st.write('**Data transformation:**', transformations)
                 if transformations != 'None':
                     X = utils.transform(X, categ_columns, numerical_columns, transformations)
 
                 transformed_df = pd.concat([X, y], axis=1)
+
+                target_col = transformed_df[target]
+                transformed_df_ = transformed_df.copy()
+                if attribute_selection != 'None':
+                    transformed_df = transformed_df_
+                    new_columns = utils.attr(transformed_df.drop([target], axis=1), 
+                                             transformed_df[target], 
+                                             attribute_selection)
+                    transformed_df = transformed_df[new_columns]
+                    transformed_df = pd.concat([transformed_df, target_col], axis=1)
                 
                 col1, col2 = st.columns(2)
                 with col1:
@@ -189,73 +200,30 @@ with tab2:
                     st.write('**Number of Attributes:**', transformed_df.shape[1])
                     st.write('**Number of Classes:**', len(transformed_df[target].dropna().unique().tolist()))
                     st.write('**Class of Interest:**', i_c)
+                st.write('**Important Attributes:**', ', '.join(new_columns))
+
+                preprocessed_columns = transformed_df.columns
+                X_preprocessed, y_preprocessed = df.drop([target], axis=1), df[target]
+                preprocessed_df = pd.concat([X_preprocessed, y_preprocessed], axis=1)
 
                 try:
-                    st.dataframe(transformed_df)
+                    st.dataframe(preprocessed_df)
+                    csv = df.to_csv().encode('utf-8')
+                    st.download_button(
+                    label="Download Preprocessed Data",
+                    data=csv,
+                    file_name=f'{file_name.split(".")[0]}_preprocessed.csv',
+                    mime='text/csv')
                 except:
-                    st.write("Make sure you've secured your entire pipeline.")
-
-
+                    st.write("Make sure you've selected your entire pipeline.")
                 
-                
-                
-                # target_col = df[target]
-                # if attribute_selection == 'Recursive Feature Elimination':
-                #     df = df.dropna()
-                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 0)
-                #     df = df[new_columns]
-                #     df = pd.concat([df, target_col], axis=1)
-                #     st.write('**Important Attributes:**', ', '.join(new_columns))
-                # if attribute_selection == 'Based on Extra Trees Classifier':
-                #     df = df.dropna()
-                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 1)
-                #     df = df[new_columns]
-                #     df = pd.concat([df, target_col], axis=1)
-                #     st.write('**Important Attributes:**', ', '.join(new_columns))
-                # if attribute_selection == 'Based on Random Forest Classifier':
-                #     df = df.dropna()
-                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 2)
-                #     df = df[new_columns]
-                #     df = pd.concat([df, target_col], axis=1)
-                #     st.write('**Important Attributes:**', ', '.join(new_columns))
-                # if attribute_selection == 'LASSO':
-                #     df = df.dropna()
-                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 3)
-                #     df = df[new_columns]
-                #     df = pd.concat([df, target_col], axis=1)
-                #     st.write('**Important Attributes:**', ', '.join(new_columns))
-                # if attribute_selection == 'Boruta':
-                #     df = df.dropna()
-                #     new_columns = utils.attr(df, df.drop([target], axis=1), df[target], 4)
-                #     df = df[new_columns]
-                #     df = pd.concat([df, target_col], axis=1)
-                #     st.write('**Important Attributes:**', ', '.join(new_columns))
-
-                # columns_ = df.columns
-                # X, y = df.drop([target], axis=1), df[target]
-                # df = pd.concat([X, y], axis=1)
-
-                
-
-                # columns_ = df.columns
-                # X, y = df.drop([target], axis=1), df[target]
-                # df = pd.concat([X, y], axis=1)
-
-                # st.dataframe(df)
-
-                # csv = df.to_csv().encode('utf-8')
-                # st.download_button(
-                # label="Download Preprocessed Data",
-                # data=csv,
-                # file_name=f'{file_name.split(".")[0]}_preprocessed.csv',
-                # mime='text/csv')
 
 
 
 with tab3:
-    if df is None:
-        st.write('Please upload a file first.')
-    if df is not None:
+    if preprocessed_df is None:
+        st.write('Please ensure you have preprocessed your data.')
+    if preprocessed_df is not None:
         with st.expander('Modelling', expanded=True):
             models = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
                                                     'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
@@ -291,12 +259,18 @@ with tab3:
             st.write('**Models:**', ', '.join(models))
             st.write('**Hyperparameter Optimization:**', hyperparameter)
             st.write('**Validation Method:**', val)
+            st.dataframe(preprocessed_df)
 
         model_list = {}
         for model in models:
-            model_list[model] = modelling.get_model(model).fit(X, y)
-            st.write(model, 'model is created.')
-
+            if model in ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'Logistic Regression', 
+                      'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine']:
+                model_list[model] = modelling.get_model(model).fit(X, y)
+                st.write(model, 'model is created.')
+        for model in models:
+            if model in ['XGBoost', 'LightGBM']:
+                model_list[model] = modelling.get_model(model).fit(X, y)
+                st.write(model, 'model is created.')
 with tab4:
     if df is None:
             st.write('Please upload a file first.')

@@ -62,6 +62,7 @@ from sklearn.datasets import make_multilabel_classification
 from io import BytesIO
 import sys
 from sklearn.model_selection import RepeatedKFold
+from mrmr import mrmr_classif
 
 def has_nulls(df):
     nulls = df.isna().sum().sum()
@@ -133,15 +134,15 @@ def drop_outliers(df):
     df = df.reset_index(drop=True)
     return df
 
-def attr(df, X, y, a):
-    if a==0:
+def attr(X, y, a):
+    if a=='Recursive Feature Elimination':
         model = LogisticRegression(solver='lbfgs')
         rfe = RFE(model)
         fit = rfe.fit(X, y)
         df=rfe.transform(X)
         new_columns = list(X.columns[rfe.support_])
 
-    elif a==1:
+    elif a=='Based on Extra Trees Classifier':
         clf = ExtraTreesClassifier(n_estimators=50)
         fit = clf.fit(X, y)
         clf.feature_importances_
@@ -149,7 +150,7 @@ def attr(df, X, y, a):
         feature_idx = model.get_support()
         new_columns = list(X.columns[feature_idx])
 
-    elif a==2:
+    elif a=='Based on Random Forest Classifier':
         sel = SelectFromModel(RandomForestClassifier(n_estimators = 100))
         sel.fit(X, y)
         sel.get_support()
@@ -157,7 +158,7 @@ def attr(df, X, y, a):
         new_columns = list(X.columns[feature_idx])
         df = sel.transform(X)
 
-    elif a==3:
+    elif a=='LASSO':
         sel = SelectFromModel(LogisticRegression(C=1, penalty='l1', solver='liblinear'))
         sel.fit(X, np.ravel(y,order='C'))
         feature_idx = sel.get_support()
@@ -165,13 +166,8 @@ def attr(df, X, y, a):
         new_columns = list(X.columns[feature_idx])
         df = sel.transform(X)
 
-    elif a==4:
-        rfc = RandomForestClassifier(random_state=1, n_estimators=1000, max_depth=5)
-        boruta_selector = BorutaPy(rfc, n_estimators='auto', verbose=2, random_state=1)
-        boruta_selector.fit(np.array(X), np.array(y))
-        a=X.columns[boruta_selector.support_]
-        new_columns=list(a)
-        df = boruta_selector.transform(np.array(X))
+    elif a=='mRMR (minimum Redundancy - Maximum Relevance)':
+        new_columns = mrmr_classif(X=X, y=y, K=round(X.shape[1]/2))
 
     return new_columns
 
@@ -194,7 +190,8 @@ def transform(df, categ_columns, numerical_columns, transformation):
     }
     if transformation is not 'None':
         numerical_pipeline = make_pipeline(transformations[transformation])
-        numerical = pd.DataFrame(numerical_pipeline.fit_transform(numerical), columns=numerical_columns)
+        numerical = pd.DataFrame(numerical_pipeline.fit_transform(numerical), 
+                                 columns=numerical_columns)
 
     df = pd.concat([categ, numerical], axis=1)
 
