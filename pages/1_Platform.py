@@ -154,12 +154,7 @@ with tab2:
 
                 if class_imbalance != 'None':
                     st.write('**Class imbalance handling strategy:**', class_imbalance)
-                    if class_imbalance == 'SMOTE':
-                        X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], 0)
-                    if class_imbalance == 'SMOTETomek':
-                        X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], 1)
-                    if class_imbalance == 'SMOTE-NC':
-                        X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], 2)
+                    X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], class_imbalance)
 
                 balanced_df = pd.concat([X, y], axis=1)
                 
