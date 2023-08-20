@@ -151,9 +151,10 @@ with tab2:
                 encoded_df = utils.encode_categorical_columns(new_df)
 
                 X, y = encoded_df.drop([target], axis=1), encoded_df[target]
-
+                X_, y_ = X, y
                 if class_imbalance != 'None':
                     st.write('**Class imbalance handling strategy:**', class_imbalance)
+                    X, y = X_, y_
                     X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], class_imbalance)
 
                 balanced_df = pd.concat([X, y], axis=1)
