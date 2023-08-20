@@ -295,18 +295,18 @@ def transform_features(x, a):
 
 
 
-def smote_function(X,y, a):
+def smote_function(X,y, smote):
     categorical_features = np.argwhere(np.array([len(set(X.iloc[:,x])) for x in range(X.shape[1])]) <= 9).flatten()
     ##normalde buradaki <=10 du, bu haliyle bazı sayısalları kategorik yapıyor veya cinsiyeti kategorik görmüyor vs, bağlanıp bakmamız gerek aslında
 
-    if a==0:
+    if smote=='SMOTE':
         try:
             sm = SMOTE()
             X, y = sm.fit_resample(X, y)
         except:
             ros = RandomOverSampler()
             X, y = ros.fit_resample(X, y)
-    elif a==1:
+    elif smote=='SMOTETomek':
         try:
             sm = SMOTETomek()
             X, y = sm.fit_resample(X, y)
@@ -314,7 +314,7 @@ def smote_function(X,y, a):
             ros = RandomOverSampler(sampling_strategy='not majority')
             X, y = ros.fit_resample(X, y)
 
-    elif a==2 and len(categorical_features) !=0:
+    elif smote=='SMOTE-NC' and len(categorical_features) !=0:
         try:
             sm = SMOTENC(categorical_features=categorical_features, 
                         sampling_strategy='not majority')
@@ -323,7 +323,7 @@ def smote_function(X,y, a):
             ros = RandomOverSampler(sampling_strategy='not majority')
             X, y = ros.fit_resample(X, y)
 
-    elif a==2 and len(categorical_features) ==0:
+    elif smote=='SMOTE-NC' and len(categorical_features) == 0:
         try:
             sm = SMOTE()
             X, y = sm.fit_resample(X, y)
