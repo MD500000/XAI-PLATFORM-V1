@@ -175,13 +175,7 @@ with tab2:
                 numerical_columns = utils.numerical_columns(X)
                 
                 st.write('**Data transformation:**', transformations)
-                if transformations == 'Normalization':
-                    X = utils.transform(X, categ_columns, numerical_columns, transformations)
-                if transformations == 'Min-max Standardization':
-                    X = utils.transform(X, categ_columns, numerical_columns, transformations)
-                if transformations == 'Standardization':
-                    X = utils.transform(X, categ_columns, numerical_columns, transformations)
-                if transformations == 'Robust Standardization':
+                if transformations != 'None':
                     X = utils.transform(X, categ_columns, numerical_columns, transformations)
 
                 transformed_df = pd.concat([X, y], axis=1)
