@@ -15,13 +15,14 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["File Upload", "Data Preprocessing", "Mo
 df = None
 new_df = None
 preprocessed_df = None
+uploaded_file = None
 
 with tab1:
-    if df is None:
-            st.write('Please upload a file first.')
-
     uploaded_file = st.file_uploader('Choose a file', 
                                 type=['xls', 'xlsx', 'sav', 'csv', 'txt'])
+    
+    if uploaded_file is None:
+            st.write('Please upload a file first.')
     
     if uploaded_file is not None:
         file_name = uploaded_file.name
@@ -141,9 +142,11 @@ with tab2:
                 #if m_c == 'Remove rows with missing values':
                     #new_df = new_df_.copy() 
                     #new_df = new_df.dropna()
-                if m_c == 'Most-frequent imputation':
-                    new_df = new_df_.copy()
-                    new_df = utils.simple_imputer(new_df)
+                #if m_c == 'Most-frequent imputation':
+                    #new_df = new_df_.copy()
+                    #new_df = utils.simple_imputer(new_df)
+
+                # check if upsampling takes target into account.
                     
                 st.write('**Target:', new_df[target].value_counts().to_dict())
 
