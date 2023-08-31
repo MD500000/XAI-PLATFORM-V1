@@ -92,8 +92,10 @@ def categ_columns(df):
 def encode_categorical_columns(df):
     for col in df.columns:
         if df[col].dtype.name in ["category", "object"]:
-            df[col] = df[col].astype("category")
-            df[col] = df[col].cat.codes
+            le = preprocessing.LabelEncoder()
+            df[col] = le.fit_transform(df[col])
+            #df[col] = df[col].astype("category")
+            #df[col] = df[col].cat.codes
     return df
 
 def numerical_columns(df):
