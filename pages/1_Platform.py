@@ -110,6 +110,7 @@ with tab2:
                     ['None','SMOTE-NC'])
                 else:
                     st.write('There is no class imbalance problem in the dataset.')
+                
             
             with st.expander('Outlier Value Analysis Result', expanded=True):
                 if utils.check_for_outliers(new_df) == 0:
@@ -118,6 +119,7 @@ with tab2:
                 else:
                     st.write('Outlier values are detected in the data set. Total Outlier Values:', utils.check_for_outliers(df))
                     outliers = st.radio('Remove outliers?',['No', 'Yes'])
+                
             
             with st.expander('Transformation Methods', expanded=True):
                 transformations = st.radio('Please choose one of the following methods for data transformation.',
@@ -126,6 +128,7 @@ with tab2:
                 'Min-max Standardization', 
                 'Standardization', 
                 'Robust Standardization'])
+                
             
             with st.expander('Attribute Selection Methods', expanded=True):
                 attribute_selection = st.radio('Please choose one of the following methods for attribute selection.',
@@ -135,88 +138,87 @@ with tab2:
                 'Based on Random Forest Classifier', 
                 'LASSO',
                 'mRMR (minimum Redundancy - Maximum Relevance)'])
+                
 
             with st.expander('Preprocessing Pipeline', expanded=True):
                 new_df_ = new_df.copy()
                 st.write('**Missing data:**', m_c)
-                #if m_c == 'Remove rows with missing values':
-                    #new_df = new_df_.copy() 
-                    #new_df = new_df.dropna()
-                #if m_c == 'Most-frequent imputation':
-                    #new_df = new_df_.copy()
-                    #new_df = utils.simple_imputer(new_df)
+                if m_c == 'Remove rows with missing values':
+                    new_df = new_df_.copy() 
+                    new_df = new_df.dropna()
+                if m_c == 'Most-frequent imputation':
+                    new_df = new_df_.copy()
+                    new_df = utils.simple_imputer(new_df)
 
-                # check if upsampling takes target into account.
+                encoded_df = utils.encode_categorical_columns(new_df)
+
+
+                X, y = encoded_df.drop([target], axis=1), encoded_df[target]
+                X_, y_ = X.copy(), y.copy()
+                if class_imbalance != 'None':
+                    st.write('**Class imbalance handling strategy:**', class_imbalance)
+                    X, y = X_, y_
+                    X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], class_imbalance)
+
+                balanced_df = pd.concat([X, y], axis=1)
+                balanced_df_ = balanced_df.copy()
+                
+                st.write('**Remove outliers:**', outliers)
+                if outliers == 'Yes':
+                     balanced_df = utils.drop_outliers(balanced_df)
+                if outliers == 'No':
+                    balanced_df = balanced_df_
+
+
+                X, y = balanced_df.drop([target], axis=1), balanced_df[target]
+
+                new_columns = X.columns
+                st.write('**Attribute selection method:**', attribute_selection)
+                if attribute_selection == 'None':
+                    new_columns = cols
+                
+                st.write('**Data transformation:**', transformations)
+                if transformations != 'None':
+                    X = utils.transform(X, categ_columns, numerical_columns, transformations)
+
+                transformed_df = pd.concat([X, y], axis=1)
+
+                target_col = transformed_df[target]
+                transformed_df_ = transformed_df.copy()
+                if attribute_selection != 'None':
+                    transformed_df = transformed_df_
+                    new_columns = utils.attr(transformed_df.drop([target], axis=1), 
+                                             transformed_df[target], 
+                                             attribute_selection)
+                    transformed_df = transformed_df[new_columns]
+                    transformed_df = pd.concat([transformed_df, target_col], axis=1)
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write('**Number of Instances:**', transformed_df.shape[0])
+                    st.write('**Number of Predictive Attributes:**', len(pred))
+                    st.write('**Number of Target Attributes:**', len([target]))
                     
-                st.write('**Target:', new_df[target].value_counts().to_dict())
+                with col2:
+                    st.write('**Number of Attributes:**', transformed_df.shape[1])
+                    st.write('**Number of Classes:**', len(transformed_df[target].dropna().unique().tolist()))
+                    st.write('**Class of Interest:**', i_c)
+                st.write('**Important Attributes:**', ', '.join(new_columns))
 
-                #encoded_df = utils.encode_categorical_columns(new_df)
+                preprocessed_columns = transformed_df.columns
+                X_preprocessed, y_preprocessed = transformed_df.drop([target], axis=1), transformed_df[target]
+                preprocessed_df = pd.concat([X_preprocessed, y_preprocessed], axis=1)
 
-                # X, y = encoded_df.drop([target], axis=1), encoded_df[target]
-                # X_, y_ = X.copy(), y.copy()
-                # if class_imbalance != 'None':
-                #     st.write('**Class imbalance handling strategy:**', class_imbalance)
-                #     X, y = X_, y_
-                #     X, y = utils.smote_function(encoded_df.drop([target], axis=1), encoded_df[target], class_imbalance)
-
-                # balanced_df = pd.concat([X, y], axis=1)
-                # balanced_df_ = balanced_df.copy()
-                
-                # st.write('**Remove outliers:**', outliers)
-                # if outliers == 'Yes':
-                #      balanced_df = utils.drop_outliers(balanced_df)
-                # if outliers == 'No':
-                #     balanced_df = balanced_df_
-
-                # X, y = balanced_df.drop([target], axis=1), balanced_df[target]
-
-                # new_columns = X.columns
-                # st.write('**Attribute selection method:**', attribute_selection)
-                # if attribute_selection == 'None':
-                #     new_columns = cols
-                
-                # st.write('**Data transformation:**', transformations)
-                # if transformations != 'None':
-                #     X = utils.transform(X, categ_columns, numerical_columns, transformations)
-
-                # transformed_df = pd.concat([X, y], axis=1)
-
-                # target_col = transformed_df[target]
-                # transformed_df_ = transformed_df.copy()
-                # if attribute_selection != 'None':
-                #     transformed_df = transformed_df_
-                #     new_columns = utils.attr(transformed_df.drop([target], axis=1), 
-                #                              transformed_df[target], 
-                #                              attribute_selection)
-                #     transformed_df = transformed_df[new_columns]
-                #     transformed_df = pd.concat([transformed_df, target_col], axis=1)
-                
-                # col1, col2 = st.columns(2)
-                # with col1:
-                #     st.write('**Number of Instances:**', transformed_df.shape[0])
-                #     st.write('**Number of Predictive Attributes:**', len(pred))
-                #     st.write('**Number of Target Attributes:**', len([target]))
-                    
-                # with col2:
-                #     st.write('**Number of Attributes:**', transformed_df.shape[1])
-                #     st.write('**Number of Classes:**', len(transformed_df[target].dropna().unique().tolist()))
-                #     st.write('**Class of Interest:**', i_c)
-                # st.write('**Important Attributes:**', ', '.join(new_columns))
-
-                # preprocessed_columns = transformed_df.columns
-                # X_preprocessed, y_preprocessed = df.drop([target], axis=1), df[target]
-                # preprocessed_df = pd.concat([X_preprocessed, y_preprocessed], axis=1)
-
-                # try:
-                #     st.dataframe(preprocessed_df)
-                #     csv = df.to_csv().encode('utf-8')
-                #     st.download_button(
-                #     label="Download Preprocessed Data",
-                #     data=csv,
-                #     file_name=f'{file_name.split(".")[0]}_preprocessed.csv',
-                #     mime='text/csv')
-                # except:
-                #     st.write("Make sure you've selected your entire pipeline.")
+                try:
+                    st.dataframe(preprocessed_df)
+                    csv = df.to_csv().encode('utf-8')
+                    st.download_button(
+                    label="Download Preprocessed Data",
+                    data=csv,
+                    file_name=f'{file_name.split(".")[0]}_preprocessed.csv',
+                    mime='text/csv')
+                except:
+                    st.write("Make sure you've selected your entire pipeline.")
                 
 
 
@@ -225,6 +227,7 @@ with tab3:
     if preprocessed_df is None:
         st.write('Please ensure you have preprocessed your data.')
     if preprocessed_df is not None:
+        X, y = preprocessed_df.drop([target], axis=1), preprocessed_df[target]
         with st.expander('Modelling', expanded=True):
             models = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
                                                     'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
@@ -264,18 +267,18 @@ with tab3:
 
         model_list = {}
         for model in models:
-            if model in ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'Logistic Regression', 
+            if model in ['AdaBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'Logistic Regression', 
                       'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine']:
                 model_list[model] = modelling.get_model(model).fit(X, y)
                 st.write(model, 'model is created.')
         for model in models:
-            if model in ['XGBoost', 'LightGBM']:
+            if model in ['XGBoost', 'LightGBM', 'CatBoost']:
                 model_list[model] = modelling.get_model(model).fit(X, y)
                 st.write(model, 'model is created.')
 with tab4:
-    if df is None:
+    if preprocessed_df is None:
             st.write('Please upload a file first.')
 
 with tab5:
-    if df is None:
+    if preprocessed_df is None:
             st.write('Please upload a file first.')

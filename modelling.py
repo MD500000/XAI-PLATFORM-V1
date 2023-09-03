@@ -33,6 +33,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from lightgbm import LGBMClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+import streamlit as st
 
 
 models = {
@@ -113,7 +114,7 @@ val_methods = {
     'Nested Cross Validation': None,
 }
 
-
+@st.cache_data
 def get_model(model_name):
     return models[model_name]
 

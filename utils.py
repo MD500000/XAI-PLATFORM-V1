@@ -106,6 +106,7 @@ def numerical_columns(df):
     return numerical_columns   
 
 def check_for_outliers(df):
+    df = df.copy()
     df = encode_categorical_columns(df)
     df = df.dropna()
 
