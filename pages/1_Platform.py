@@ -7,6 +7,10 @@ import tempfile
 import os
 import utils
 import modelling
+import shap
+import streamlit.components.v1 as components
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
 st.title('XAI Platform')
 
@@ -86,7 +90,6 @@ with tab2:
         if new_df is None:
             st.write('Please upload a file first.')
         if new_df is not None:        
-            st.write('**Target:', new_df[target].value_counts().to_dict())
             with st.expander('Missing Data Analysis Results', expanded=True):
                 missing = utils.has_nulls(new_df)
                 m_c = 'No missing values'
@@ -273,11 +276,19 @@ with tab3:
                 st.write(model, 'model is created.')
         for model in models:
             if model in ['XGBoost', 'LightGBM', 'CatBoost']:
-                model_list[model] = modelling.get_model(model).fit(X, y)
                 st.write(model, 'model is created.')
 with tab4:
     if preprocessed_df is None:
             st.write('Please upload a file first.')
+
+    # for model in model_list.keys():
+    #     print(model)
+    #     if model in ['XGBoost', 'LightGBM', 'CatBoost']:
+    #         st.write(f'{model} SHAP Explainer:')
+    #         explainer = shap.TreeExplainer(model_list[model])
+    #         shap_values = explainer.shap_values(X)
+    #         st.pyplot(shap.summary_plot(shap_values, X))
+
 
 with tab5:
     if preprocessed_df is None:
