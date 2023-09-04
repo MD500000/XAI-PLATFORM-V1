@@ -1,3 +1,5 @@
+import matplotlib
+from sklearn.model_selection import train_test_split
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -236,13 +238,19 @@ with tab3:
                                                     'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
         
             hyperparameter = st.radio('Hyperparameter Optimization', ['Yes', 'No'])
+            if hyperparameter == 'Yes':
+                k_fold_opt = st.slider('Select k-fold:', 2, 10, 2, 1)
 
         with st.expander('Validation', expanded=True): 
-            val = st.radio('Select Validation Method', ['Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
-                                                                'Repeated Cross Validation', 'Nested Cross Validation'])
+            val = st.radio('Select Validation Method', ['None', 'Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
+                                                        'Repeated Cross Validation', 'Nested Cross Validation'])
+            
+            
+
             if val == "Holdout":
                 train_size = st.slider('Select the training dataset percentage:', 50, 100, 50, 5)
-            
+                x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=train_size/100, random_state=42)
+
             if val == "Repeated Holdout":
                 split_size = st.slider('Select split size:', 50, 100, 50, 5)
                 repeats = st.slider('Select the number of repeats:', 5, 50, 5, 1)
@@ -273,21 +281,24 @@ with tab3:
             if model in ['AdaBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'Logistic Regression', 
                       'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine']:
                 model_list[model] = modelling.get_model(model).fit(X, y)
+
                 st.write(model, 'model is created.')
         for model in models:
             if model in ['XGBoost', 'LightGBM', 'CatBoost']:
+                model_list[model] = modelling.get_model(model).fit(X, y)
                 st.write(model, 'model is created.')
 with tab4:
     if preprocessed_df is None:
             st.write('Please upload a file first.')
+    
 
-    # for model in model_list.keys():
-    #     print(model)
-    #     if model in ['XGBoost', 'LightGBM', 'CatBoost']:
-    #         st.write(f'{model} SHAP Explainer:')
-    #         explainer = shap.TreeExplainer(model_list[model])
-    #         shap_values = explainer.shap_values(X)
-    #         st.pyplot(shap.summary_plot(shap_values, X))
+    for model in model_list.keys():
+        if model in ['XGBoost', 'CatBoost', 'Decision Tree']:
+            st.write(model)
+            explainer = shap.TreeExplainer(model_list[model])
+            print(type(explainer))
+            shap_values = explainer.shap_values(X)
+            print(np.array(shap_values).shape)
 
 
 with tab5:

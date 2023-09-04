@@ -121,5 +121,20 @@ def get_model(model_name):
 def get_model_param_space(model_name):
     return models_param_space[model_name]
 
-def get_val(val_method):
-    return None
+# def validate(val_method, model, opt):
+
+#     if val_method == 'Holdout':
+#         return holdout(model, opt)
+#     elif val_method == 'Repeated Holdout':
+#         return repeated_holdout(model, opt)
+#     elif val_method == 'Stratified K-fold Cross Validation':
+#         return stratified_kfold_cv(model, opt)
+#     elif val_method == 'Leave One Out Cross Validation':
+#         return leave_one_out_cv(model, opt)
+#     elif val_method == 'Repeated Cross Validation':
+#         return repeated_cv(model, opt)
+#     elif val_method == 'Nested Cross Validation':
+#         return nested_cv(model, opt)
+    
+
+#def holdout(model, opt):
