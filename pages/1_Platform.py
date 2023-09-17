@@ -1,3 +1,4 @@
+from hmac import new
 import matplotlib
 from sklearn.model_selection import train_test_split
 import streamlit as st
@@ -16,12 +17,13 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 st.title('XAI Platform')
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["File Upload", "Data Preprocessing", "Modelling", "LIME", "SHAP"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["File Upload", "Data Preprocessing", "Modelling", "SHAP", "LIME"])
 
 df = None
 new_df = None
 preprocessed_df = None
 uploaded_file = None
+model_count = 0
 
 with tab1:
     uploaded_file = st.file_uploader('Choose a file', 
@@ -69,6 +71,9 @@ with tab1:
                 st.write('Select the class of interest')
                 i_c = st.selectbox('Class of interest', df[target].dropna().unique().tolist())
 
+            for cls in df[target].unique().tolist():
+                print(cls)
+
             new_df = df[pred + [target]]
             class_of_interest = i_c
 
@@ -91,7 +96,8 @@ with tab1:
 with tab2:
         if new_df is None:
             st.write('Please upload a file first.')
-        if new_df is not None:        
+        if new_df is not None:   
+            new_df = new_df.replace(r'^\s*$', None, regex=True)     
             with st.expander('Missing Data Analysis Results', expanded=True):
                 missing = utils.has_nulls(new_df)
                 m_c = 'No missing values'
@@ -146,6 +152,7 @@ with tab2:
                 
 
             with st.expander('Preprocessing Pipeline', expanded=True):
+                
                 new_df_ = new_df.copy()
                 st.write('**Missing data:**', m_c)
                 if m_c == 'Remove rows with missing values':
@@ -154,7 +161,7 @@ with tab2:
                 if m_c == 'Most-frequent imputation':
                     new_df = new_df_.copy()
                     new_df = utils.simple_imputer(new_df)
-
+                
                 encoded_df = utils.encode_categorical_columns(new_df)
 
 
@@ -224,9 +231,6 @@ with tab2:
                     mime='text/csv')
                 except:
                     st.write("Make sure you've selected your entire pipeline.")
-                
-
-
 
 with tab3:
     if preprocessed_df is None:
@@ -275,30 +279,35 @@ with tab3:
             st.write('**Hyperparameter Optimization:**', hyperparameter)
             st.write('**Validation Method:**', val)
             st.dataframe(preprocessed_df)
-
+        
         model_list = {}
         for model in models:
             if model in ['AdaBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'Logistic Regression', 
                       'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine']:
                 model_list[model] = modelling.get_model(model).fit(X, y)
+                model_count += 1
 
                 st.write(model, 'model is created.')
         for model in models:
             if model in ['XGBoost', 'LightGBM', 'CatBoost']:
                 model_list[model] = modelling.get_model(model).fit(X, y)
                 st.write(model, 'model is created.')
+                model_count += 1
 with tab4:
     if preprocessed_df is None:
             st.write('Please upload a file first.')
     
-
-    for model in model_list.keys():
-        if model in ['XGBoost', 'CatBoost', 'Decision Tree']:
-            st.write(model)
-            explainer = shap.TreeExplainer(model_list[model])
-            print(type(explainer))
-            shap_values = explainer.shap_values(X)
-            print(np.array(shap_values).shape)
+    if model_count != 0:
+        for model in model_list.keys():
+            if model in ['XGBoost', 'CatBoost', 'Decision Tree', 'Gradient Boosting', 'Random Forest']:
+                st.write(model)
+                shap_values = shap.TreeExplainer(model_list[model]).shap_values(X)
+                #explainer = shap.Explainer(model, X)
+                #shap_values = explainer(X)
+                st.pyplot(shap.summary_plot(shap_values, X))
+                #print(type(explainer))
+                #shap_values = explainer.shap_values(X)
+                #print(np.array(shap_values).shape)
 
 
 with tab5:

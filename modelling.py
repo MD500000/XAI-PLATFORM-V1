@@ -44,8 +44,8 @@ models = {
     'Gradient Boosting': GradientBoostingClassifier(), 
     'LightGBM': LGBMClassifier(objective = 'binary'), 
     'Logistic Regression': LogisticRegression(), 
-    'Multilayer Perceptron (MLP)': RandomForestClassifier(), 
-    'Random Forest': MLPClassifier(), 
+    'Multilayer Perceptron (MLP)': MLPClassifier(), 
+    'Random Forest': RandomForestClassifier(), 
     'Support Vector Machine': SVC(probability=True), 
     'XGBoost': XGBClassifier()
 }

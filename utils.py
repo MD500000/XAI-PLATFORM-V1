@@ -106,21 +106,33 @@ def numerical_columns(df):
     return numerical_columns   
 
 def check_for_outliers(df):
-    df = df.copy()
-    df = encode_categorical_columns(df)
-    df = df.dropna()
+    outlier_count = 0
+    numerical_columns_ = numerical_columns(df)
+    for col in numerical_columns_:
+        percentile25 = df[col].quantile(0.25)
+        percentile75 = df[col].quantile(0.75)
+        iqr = percentile75 - percentile75
+        upper_limit = percentile75 + 1.5 * iqr
+        lower_limit = percentile25 - 1.5 * iqr
+        ul = np.where(df[col] > upper_limit, upper_limit, df[col])
+        ll = np.where(df[col] < lower_limit, lower_limit, df[col])
+        outlier_count += len(ul + ll)
 
-    numeric_columns = numerical_columns(df)
-    if not numeric_columns:
-        return []
+    # df = df.copy()
+    # df = encode_categorical_columns(df)
+    # df = df.dropna()
 
-    lof = LocalOutlierFactor()
-    lof.fit(df[numeric_columns])
+    # numeric_columns = numerical_columns(df)
+    # if not numeric_columns:
+    #     return []
 
-    yhat = lof.fit_predict(df[numeric_columns])
-    outliers = np.where(yhat == -1)[0]
+    # lof = LocalOutlierFactor()
+    # lof.fit(df[numeric_columns])
 
-    return len(outliers)
+    # yhat = lof.fit_predict(df[numeric_columns])
+    # outliers = np.where(yhat == -1)[0]
+
+    return outlier_count
 
 
 def is_imbalance(y):
@@ -129,12 +141,15 @@ def is_imbalance(y):
         return True
     return False
 
+def drop_outlier(df, field_name):
+    distance = 1.5 * (np.percentile(df[field_name], 75) - np.percentile(df[field_name], 25))
+    df.drop(df[df[field_name] > distance + np.percentile(df[field_name], 75)].index, inplace=True)
+    df.drop(df[df[field_name] < np.percentile(df[field_name], 25) - distance].index, inplace=True)
+
 def drop_outliers(df):
-    lof = LocalOutlierFactor()
-    yhat = lof.fit_predict(df)
-    mask = yhat != -1 ##yine burada aykırı değer içeren satırları bulduk
-    df = df.iloc[mask,:]
-    df = df.reset_index(drop=True)
+    numerical_columns_ = numerical_columns(df)
+    for col in numerical_columns_:
+        drop_outlier(df, col)
     return df
 
 def attr(X, y, a):
@@ -176,7 +191,7 @@ def attr(X, y, a):
 
 def simple_imputer(df):
     cols = list(df.columns.values)
-    imp_mean = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+    imp_mean = SimpleImputer(missing_values= np.nan, strategy='most_frequent')
     df = pd.DataFrame(imp_mean.fit_transform(df), columns=cols)
     return df
 

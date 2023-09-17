@@ -1066,7 +1066,6 @@ import time
     State("diskfoldslider1", "value"),
     State("modelsecici1", "value"),
     State("optimizekfoldslider1", "value"),
-
     )
 
 def sonuchesaplafonk(n, optimizasyonslider, method, trainslider, rholdslider,rholdsplitsizeslider, skfoldslider,kfold, nrepeat,nestedickfoldslider,nesteddiskfoldslider,   models, optsecenek):
@@ -1087,6 +1086,10 @@ def sonuchesaplafonk(n, optimizasyonslider, method, trainslider, rholdslider,rho
 
 
         global shaptype
+
+        # {'label': 'Hold-out', 'value': '0'},
+        # {'label': 'Repeated Hold-out', 'value': '1'}, {'label': 'Stratified K Fold Cross Validation', 'value': '2'},{'label': 'Leave one out Cross Validation', 'value': '3'},{'label': 'Repeated Cross Validation', 'value': '4'} , {'label': 'Nested Cross Validation', 'value': '5'} ],id="veriseti-bolum-secici1",
+            
 
         if new_df is None or new_oz_df is None or new_hedef_df is None:
             return html.H5("The preprocessing steps are not completed. Return to data preprocessing page.")
