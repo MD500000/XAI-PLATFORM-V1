@@ -106,6 +106,7 @@ def numerical_columns(df):
     return numerical_columns   
 
 def check_for_outliers(df):
+
     outlier_count = 0
     numerical_columns_ = numerical_columns(df)
     for col in numerical_columns_:
@@ -118,21 +119,8 @@ def check_for_outliers(df):
         ll = np.where(df[col] < lower_limit, lower_limit, df[col])
         outlier_count += len(ul + ll)
 
-    # df = df.copy()
-    # df = encode_categorical_columns(df)
-    # df = df.dropna()
-
-    # numeric_columns = numerical_columns(df)
-    # if not numeric_columns:
-    #     return []
-
-    # lof = LocalOutlierFactor()
-    # lof.fit(df[numeric_columns])
-
-    # yhat = lof.fit_predict(df[numeric_columns])
-    # outliers = np.where(yhat == -1)[0]
-
-    return outlier_count
+    if outlier_count > 0:
+        return True
 
 
 def is_imbalance(y):
@@ -146,11 +134,12 @@ def drop_outlier(df, field_name):
     df.drop(df[df[field_name] > distance + np.percentile(df[field_name], 75)].index, inplace=True)
     df.drop(df[df[field_name] < np.percentile(df[field_name], 25) - distance].index, inplace=True)
 
+
 def drop_outliers(df):
     numerical_columns_ = numerical_columns(df)
     for col in numerical_columns_:
         drop_outlier(df, col)
-    return df
+    return df.reset_index(drop=True)
 
 def attr(X, y, a):
     if a=='Recursive Feature Elimination':
@@ -196,7 +185,6 @@ def simple_imputer(df):
     return df
 
 def transform(df, categ_columns, numerical_columns, transformation):
-
     categ = df[categ_columns]
     numerical = df[numerical_columns]
 

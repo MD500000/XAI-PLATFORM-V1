@@ -12,6 +12,7 @@ import utils
 import modelling
 import shap
 import streamlit.components.v1 as components
+import lime
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -24,6 +25,7 @@ new_df = None
 preprocessed_df = None
 uploaded_file = None
 model_count = 0
+target = []
 
 with tab1:
     uploaded_file = st.file_uploader('Choose a file', 
@@ -96,16 +98,17 @@ with tab1:
 with tab2:
         if new_df is None:
             st.write('Please upload a file first.')
-        if new_df is not None:   
-            new_df = new_df.replace(r'^\s*$', None, regex=True)     
+    
+
+        if new_df is not None:       
             with st.expander('Missing Data Analysis Results', expanded=True):
                 missing = utils.has_nulls(new_df)
                 m_c = 'No missing values'
                 if(missing):
                     st.write('Total Missing Values:', utils.null_count(new_df))
                     m_c = st.radio('Missing Value Imputation Method:', 
-                    ['Remove rows with missing values', 
-                    'Most-frequent imputation'])
+                    ['Remove rows with missing values',])
+                    #'Most-frequent imputation'])
                 else:
                     st.write('No missing values found.')
             
@@ -154,14 +157,16 @@ with tab2:
             with st.expander('Preprocessing Pipeline', expanded=True):
                 
                 new_df_ = new_df.copy()
+                for cls in new_df_[target].unique().tolist():
+                    print(cls)
                 st.write('**Missing data:**', m_c)
                 if m_c == 'Remove rows with missing values':
-                    new_df = new_df_.copy() 
-                    new_df = new_df.dropna()
-                if m_c == 'Most-frequent imputation':
                     new_df = new_df_.copy()
-                    new_df = utils.simple_imputer(new_df)
-                
+                    new_df = new_df.dropna().reset_index(drop=True)
+                #if m_c == 'Most-frequent imputation':
+                #    new_df = new_df_.copy()
+                #    new_df = utils.simple_imputer(new_df)
+
                 encoded_df = utils.encode_categorical_columns(new_df)
 
 
@@ -177,6 +182,7 @@ with tab2:
                 
                 st.write('**Remove outliers:**', outliers)
                 if outliers == 'Yes':
+                     balanced_df = balanced_df_
                      balanced_df = utils.drop_outliers(balanced_df)
                 if outliers == 'No':
                     balanced_df = balanced_df_
@@ -241,75 +247,109 @@ with tab3:
             models = st.multiselect('Select Model', ['AdaBoost', 'CatBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'LightGBM', 'Logistic Regression', 
                                                     'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine', 'XGBoost'])
         
-            hyperparameter = st.radio('Hyperparameter Optimization', ['Yes', 'No'])
-            if hyperparameter == 'Yes':
-                k_fold_opt = st.slider('Select k-fold:', 2, 10, 2, 1)
+            # hyperparameter = st.radio('Hyperparameter Optimization', ['Yes', 'No'])
+            # if hyperparameter == 'Yes':
+            #     k_fold_opt = st.slider('Select k-fold:', 2, 10, 2, 1)
 
-        with st.expander('Validation', expanded=True): 
-            val = st.radio('Select Validation Method', ['None', 'Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
-                                                        'Repeated Cross Validation', 'Nested Cross Validation'])
+        # with st.expander('Validation', expanded=True): 
+        #     val = st.radio('Select Validation Method', ['None', 'Holdout', 'Repeated Holdout', 'Stratified K-fold Cross Validation', 'Leave One Out Cross Validation', 
+        #                                                 'Repeated Cross Validation', 'Nested Cross Validation'])
             
             
 
-            if val == "Holdout":
-                train_size = st.slider('Select the training dataset percentage:', 50, 100, 50, 5)
-                x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=train_size/100, random_state=42)
+        #     if val == "Holdout":
+        #         train_size = st.slider('Select the training dataset percentage:', 50, 100, 50, 5)
+        #         x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=train_size/100, random_state=42)
 
-            if val == "Repeated Holdout":
-                split_size = st.slider('Select split size:', 50, 100, 50, 5)
-                repeats = st.slider('Select the number of repeats:', 5, 50, 5, 1)
+        #     if val == "Repeated Holdout":
+        #         split_size = st.slider('Select split size:', 50, 100, 50, 5)
+        #         repeats = st.slider('Select the number of repeats:', 5, 50, 5, 1)
 
-            if val == "Stratified K-fold Cross Validation":
-                k_fold = st.slider('Select k-fold:', 2, 10, 2, 1)
+        #     if val == "Stratified K-fold Cross Validation":
+        #         k_fold = st.slider('Select k-fold:', 2, 10, 2, 1)
 
-            if val == "Leave One Out Cross Validation":
-                pass
+        #     if val == "Leave One Out Cross Validation":
+        #         pass
 
-            if val == "Repeated Cross Validation":
-                k_fold = st.slider('Select k-fold:', 5, 10, 5, 1)
-                repeats = st.slider('Select the number of repeats:', 5, 10, 5, 1)
+        #     if val == "Repeated Cross Validation":
+        #         k_fold = st.slider('Select k-fold:', 5, 10, 5, 1)
+        #         repeats = st.slider('Select the number of repeats:', 5, 10, 5, 1)
 
-            if val == "Nested Cross Validation":
-                inner_k = st.slider('Select inner k-fold:', 5, 10, 5, 1)
-                outer_k = st.slider('Select outer k-fold:', 5, 10, 5, 1)
+        #     if val == "Nested Cross Validation":
+        #         inner_k = st.slider('Select inner k-fold:', 5, 10, 5, 1)
+        #         outer_k = st.slider('Select outer k-fold:', 5, 10, 5, 1)
 
         
-        with st.expander('Modelling Options', expanded=True):  
-            st.write('**Models:**', ', '.join(models))
-            st.write('**Hyperparameter Optimization:**', hyperparameter)
-            st.write('**Validation Method:**', val)
-            st.dataframe(preprocessed_df)
-        
-        model_list = {}
-        for model in models:
-            if model in ['AdaBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'Logistic Regression', 
-                      'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine']:
-                model_list[model] = modelling.get_model(model).fit(X, y)
-                model_count += 1
+        # with st.expander('Modelling Options', expanded=True):  
+        #     st.write('**Models:**', ', '.join(models))
+        #     st.write('**Hyperparameter Optimization:**', hyperparameter)
+        #     st.write('**Validation Method:**', val)
+        #     st.dataframe(preprocessed_df)
+        with st.spinner('Please while we create models.'):
+            model_list = {}
+            models_created = []
+            for model in models:
+                if model in ['AdaBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'Logistic Regression', 
+                        'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine']:
+                    try:
+                        model_list[model] = modelling.get_model(model).fit(X, y)
+                        models_created.append(model)
+                        model_count += 1
+                    except:
+                        st.write(f'**{model}** is not supported for the data you uploaded.')
+                    
 
-                st.write(model, 'model is created.')
-        for model in models:
-            if model in ['XGBoost', 'LightGBM', 'CatBoost']:
-                model_list[model] = modelling.get_model(model).fit(X, y)
-                st.write(model, 'model is created.')
-                model_count += 1
+            for model in models:
+                if model in ['XGBoost', 'LightGBM', 'CatBoost']:
+                    try:
+                        model_list[model] = modelling.get_model(model).fit(X, y)
+                        models_created.append(model)
+                        model_count += 1
+                    except:
+                        st.write(f'**{model}** is not supported for the data you uploaded.')
+
+        if model_count != 0:
+            st.write('**Models:**', ', '.join(models_created))
+
 with tab4:
     if preprocessed_df is None:
             st.write('Please upload a file first.')
-    
-    if model_count != 0:
-        for model in model_list.keys():
-            if model in ['XGBoost', 'CatBoost', 'Decision Tree', 'Gradient Boosting', 'Random Forest']:
-                st.write(model)
-                shap_values = shap.TreeExplainer(model_list[model]).shap_values(X)
-                #explainer = shap.Explainer(model, X)
-                #shap_values = explainer(X)
-                st.pyplot(shap.summary_plot(shap_values, X))
-                #print(type(explainer))
-                #shap_values = explainer.shap_values(X)
-                #print(np.array(shap_values).shape)
+    with st.spinner('Please while we explain the predictions.'):
+        if model_count != 0:
+            for model in model_list.keys():
+                if model in ['XGBoost', 'CatBoost', 'Decision Tree', 'Gradient Boosting', 'Random Forest']:
+                    st.write(model)
+                    shap_values = shap.TreeExplainer(model_list[model]).shap_values(X)
+                    #explainer = shap.Explainer(model, X)
+                    #shap_values = explainer(X)
+                    st.pyplot(shap.summary_plot(shap_values, X))
+                    #print(type(explainer))
+                    #shap_values = explainer.shap_values(X)
+                    #print(np.array(shap_values).shape)
+                else:
+                    st.write(model)
+                    shap_values = shap.KernelExplainer(model_list[model].predict_proba, X).shap_values(X)
+                    st.pyplot(shap.summary_plot(shap_values, X))
 
 
 with tab5:
     if preprocessed_df is None:
             st.write('Please upload a file first.')
+    with st.spinner('Please while we explain the predictions.'):
+        if model_count != 0:
+            for model in model_list.keys():
+                explainer = lime.lime_tabular.LimeTabularExplainer(np.array(X), feature_names=list(X.columns), categorical_features=categ_columns)
+                instances = X.shape[0]
+                inc_int = np.random.randint(0, instances)
+                if st.button('New Instace', key=f'new_instance_{model}'):
+                    inc_int = np.random.randint(0, instances)
+                
+                st.write(model)
+                
+                ic, pc = st.columns(2)
+                with ic:
+                    st.write('**Instance:**', X.iloc[inc_int])
+                with pc:
+                    st.write('**Prediction:**', model_list[model].predict_proba(np.array(X.iloc[inc_int]).reshape(1, -1)))
+                exp = explainer.explain_instance(np.array(X.iloc[inc_int]), model_list[model].predict_proba, num_features=5)
+                st.pyplot(exp.as_pyplot_figure())
