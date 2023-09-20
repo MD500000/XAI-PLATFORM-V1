@@ -23,17 +23,18 @@ def n_predict_value(y_true, y_pred):
     return (tn)/(tn+fn)
 
 def calc_score(classifier, X, y):
-    
+    scoring_opts = ['accuracy', 'f1_weighted', 'precision_weighted','recall_weighted',"roc_auc_ovr"]
+    scores = []
     for scoring_opt in scoring_opts:
         score = cross_val_score(classifier, X, y, scoring=scoring_opt)
         score = (mean(score))
-        scoring_opts.append(round((score),3)) 
+        scores.append(round((score),3)) 
 
-    score_fpr = cross_validation(false_positive_rate, classifier, X, y)
-    score_tpr = cross_validation(true_positive_rate, classifier, X, y)
-    score_npv = cross_validation(n_predict_value, classifier, X, y)
+    #score_fpr = cross_validation(false_positive_rate, classifier, X, y)
+    #score_tpr = cross_validation(true_positive_rate, classifier, X, y)
+    #score_npv = cross_validation(n_predict_value, classifier, X, y)
 
-    return *scoring_opts, score_fpr, score_tpr, score_npv
+    return (*scores,) #score_fpr, score_tpr, score_npv
 
 def cross_validation(scorer_param, classifier, X, y):
     scorer = make_scorer(scorer_param)

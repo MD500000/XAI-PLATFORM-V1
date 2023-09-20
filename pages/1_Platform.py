@@ -13,6 +13,7 @@ import modelling
 import shap
 import streamlit.components.v1 as components
 import lime
+from val import calc_score
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -310,6 +311,16 @@ with tab3:
 
         if model_count != 0:
             st.write('**Models:**', ', '.join(models_created))
+            for model in model_list.keys():
+                with st.expander(f'{model} Results', expanded=True):
+                    scores = calc_score(model_list[model], X, y)
+                    labels = ["accuracy", "f1_weighted", "precision_weighted","recall_weighted","roc_auc_ovr"]
+                    scores = dict(zip(labels, scores))
+                    st.dataframe(pd.DataFrame.from_dict(scores, orient='index', columns=['Score']))
+
+
+
+
 
 with tab4:
     if preprocessed_df is None:
@@ -337,8 +348,12 @@ with tab5:
                 explainer = lime.lime_tabular.LimeTabularExplainer(np.array(X), feature_names=list(X.columns), categorical_features=categ_columns)
                 instances = X.shape[0]
                 inc_int = np.random.randint(0, instances)
-                if st.button('New Instace', key=f'new_instance_{model}'):
+                if st.button('Random Instace', key=f'new_instance_{model}'):
                     inc_int = np.random.randint(0, instances)
+                st.dataframe(X)
+                record = st.number_input('Instance', min_value=0, max_value=instances-1, value=inc_int, step=1, key=f'instance_{model}')
+                if st.button('Explain', key=f'explain_{model}'):
+                    inc_int = record
                 
                 st.write(model)
                 
