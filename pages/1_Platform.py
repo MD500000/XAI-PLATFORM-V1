@@ -229,7 +229,7 @@ with tab2:
 
                 try:
                     st.dataframe(preprocessed_df)
-                    csv = df.to_csv().encode('utf-8')
+                    csv = preprocessed_df.to_csv().encode('utf-8')
                     st.download_button(
                     label="Download Preprocessed Data",
                     data=csv,
