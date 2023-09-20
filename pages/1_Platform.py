@@ -320,12 +320,8 @@ with tab4:
                 if model in ['XGBoost', 'CatBoost', 'Decision Tree', 'Gradient Boosting', 'Random Forest']:
                     st.write(model)
                     shap_values = shap.TreeExplainer(model_list[model]).shap_values(X)
-                    #explainer = shap.Explainer(model, X)
-                    #shap_values = explainer(X)
                     st.pyplot(shap.summary_plot(shap_values, X))
-                    #print(type(explainer))
-                    #shap_values = explainer.shap_values(X)
-                    #print(np.array(shap_values).shape)
+
                 else:
                     st.write(model)
                     shap_values = shap.KernelExplainer(model_list[model].predict_proba, X).shap_values(X)
