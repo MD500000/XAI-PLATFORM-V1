@@ -295,6 +295,10 @@ with tab3:
                     try:
                         model_list[model] = modelling.get_model(model).fit(X, y)
                         models_created.append(model)
+                        scores = calc_score(model_list[model], X, y)
+                        labels = ["accuracy", "f1_weighted", "precision_weighted","recall_weighted","roc_auc_ovr"]
+                        scores = dict(zip(labels, scores))
+                        st.dataframe(pd.DataFrame.from_dict(scores, orient='index', columns=['Score']))
                         model_count += 1
                     except:
                         st.write(f'**{model}** is not supported for the data you uploaded.')
@@ -305,6 +309,10 @@ with tab3:
                     try:
                         model_list[model] = modelling.get_model(model).fit(X, y)
                         models_created.append(model)
+                        scores = calc_score(model_list[model], X, y)
+                        labels = ["accuracy", "f1_weighted", "precision_weighted","recall_weighted","roc_auc_ovr"]
+                        scores = dict(zip(labels, scores))
+                        st.dataframe(pd.DataFrame.from_dict(scores, orient='index', columns=['Score']))
                         model_count += 1
                     except:
                         st.write(f'**{model}** is not supported for the data you uploaded.')
