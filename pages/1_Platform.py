@@ -297,7 +297,7 @@ with tab3:
                         model_list[model] = modelling.get_model(model).fit(X, y)
                         models_created.append(model)
                         scores = calc_score(model_list[model], X, y)
-                        labels = ["accuracy", "f1_weighted", "precision_weighted","recall_weighted","roc_auc_ovr"]
+                        labels = ["accuracy", "f1_weighted", "precision_weighted","recall_weighted","roc_auc_ovr", "false_positive_rate", "true_positive_rate", "negative_predictive_value"]
                         scores = dict(zip(labels, scores))
                         st.dataframe(pd.DataFrame.from_dict(scores, orient='index', columns=['Score']))
                         model_count += 1

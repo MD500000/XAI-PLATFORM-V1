@@ -30,11 +30,11 @@ def calc_score(classifier, X, y):
         score = (mean(score))
         scores.append(round((score),3)) 
 
-    #score_fpr = cross_validation(false_positive_rate, classifier, X, y)
-    #score_tpr = cross_validation(true_positive_rate, classifier, X, y)
-    #score_npv = cross_validation(n_predict_value, classifier, X, y)
+    score_fpr = cross_validation(false_positive_rate, classifier, X, y)
+    score_tpr = cross_validation(true_positive_rate, classifier, X, y)
+    score_npv = cross_validation(n_predict_value, classifier, X, y)
 
-    return (*scores,) #score_fpr, score_tpr, score_npv
+    return (*scores, score_fpr, score_tpr, score_npv)
 
 def cross_validation(scorer_param, classifier, X, y):
     scorer = make_scorer(scorer_param)
