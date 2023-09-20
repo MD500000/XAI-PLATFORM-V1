@@ -344,23 +344,24 @@ with tab5:
             st.write('Please upload a file first.')
     with st.spinner('Please while we explain the predictions.'):
         if model_count != 0:
+            st.dataframe(X)
             for model in model_list.keys():
                 explainer = lime.lime_tabular.LimeTabularExplainer(np.array(X), feature_names=list(X.columns), categorical_features=categ_columns)
                 instances = X.shape[0]
-                inc_int = np.random.randint(0, instances)
+                inc_int = None
                 if st.button('Random Instace', key=f'new_instance_{model}'):
                     inc_int = np.random.randint(0, instances)
-                st.dataframe(X)
-                record = st.number_input('Instance', min_value=0, max_value=instances-1, value=inc_int, step=1, key=f'instance_{model}')
+                
+                record = st.number_input('Instance', min_value=0, max_value=instances-1, value=0, step=1, key=f'instance_{model}')
                 if st.button('Explain', key=f'explain_{model}'):
                     inc_int = record
                 
                 st.write(model)
-                
-                ic, pc = st.columns(2)
-                with ic:
-                    st.write('**Instance:**', X.iloc[inc_int])
-                with pc:
-                    st.write('**Prediction:**', model_list[model].predict_proba(np.array(X.iloc[inc_int]).reshape(1, -1)))
-                exp = explainer.explain_instance(np.array(X.iloc[inc_int]), model_list[model].predict_proba, num_features=5)
-                st.pyplot(exp.as_pyplot_figure())
+                if inc_int is not None:
+                    ic, pc = st.columns(2)
+                    with ic:
+                        st.write('**Instance:**', X.iloc[inc_int])
+                    with pc:
+                        st.write('**Prediction:**', model_list[model].predict_proba(np.array(X.iloc[inc_int]).reshape(1, -1)))
+                    exp = explainer.explain_instance(np.array(X.iloc[inc_int]), model_list[model].predict_proba, num_features=5)
+                    st.pyplot(exp.as_pyplot_figure())
