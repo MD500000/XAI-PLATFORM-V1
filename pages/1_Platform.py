@@ -230,7 +230,7 @@ with tab2:
 
                 try:
                     st.dataframe(preprocessed_df)
-                    csv = preprocessed_df.to_csv().encode('utf-8')
+                    csv = transformed_df.to_csv().encode('utf-8')
                     st.download_button(
                     label="Download Preprocessed Data",
                     data=csv,
@@ -293,6 +293,7 @@ with tab3:
                 if model in ['AdaBoost', 'Decision Tree', 'Gaussian Naive Bayes', 'Gradient Boosting', 'Logistic Regression', 
                         'Multilayer Perceptron (MLP)', 'Random Forest', 'Support Vector Machine']:
                     try:
+                        st.write(f"**{model} Results:**")
                         model_list[model] = modelling.get_model(model).fit(X, y)
                         models_created.append(model)
                         scores = calc_score(model_list[model], X, y)
@@ -307,6 +308,7 @@ with tab3:
             for model in models:
                 if model in ['XGBoost', 'LightGBM', 'CatBoost']:
                     try:
+                        st.write(f"**{model} Results:**")
                         model_list[model] = modelling.get_model(model).fit(X, y)
                         models_created.append(model)
                         scores = calc_score(model_list[model], X, y)
@@ -317,14 +319,14 @@ with tab3:
                     except:
                         st.write(f'**{model}** is not supported for the data you uploaded.')
 
-        if model_count != 0:
-            st.write('**Models:**', ', '.join(models_created))
-            for model in model_list.keys():
-                with st.expander(f'{model} Results', expanded=True):
-                    scores = calc_score(model_list[model], X, y)
-                    labels = ["accuracy", "f1_weighted", "precision_weighted","recall_weighted","roc_auc_ovr"]
-                    scores = dict(zip(labels, scores))
-                    st.dataframe(pd.DataFrame.from_dict(scores, orient='index', columns=['Score']))
+        # if model_count != 0:
+        #     st.write('**Models:**', ', '.join(models_created))
+        #     for model in model_list.keys():
+        #         with st.expander(f'{model} Results', expanded=True):
+        #             scores = calc_score(model_list[model], X, y)
+        #             labels = ["accuracy", "f1_weighted", "precision_weighted","recall_weighted","roc_auc_ovr"]
+        #             scores = dict(zip(labels, scores))
+        #             st.dataframe(pd.DataFrame.from_dict(scores, orient='index', columns=['Score']))
 
 
 
