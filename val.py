@@ -49,13 +49,14 @@ def holdout(classifier, X, y, k_fold, repeat):
     scores_tuple = calc_score(classifier, X_test, y_test)
 
     scores_dict = {
-        'Accuracy': scores_tuple[0],
-        'Precision': scores_tuple[1],
-        'Recall': scores_tuple[2],
-        'F1': scores_tuple[3],
-        'False Positive Rate': scores_tuple[4],
+        'accuracy': scores_tuple[0],
+        'f1_weighted': scores_tuple[1],
+        'precision_weighted': scores_tuple[2],
+        'recall_weighted': scores_tuple[3],
+        'roc_auc_ovr' : scores_tuple[4],
         'True Positive Rate': scores_tuple[5],
-        'Negative Predictive Value': scores_tuple[6]
+        'False Positive Rate': scores_tuple[6],
+        'Negative Predictive Value': scores_tuple[7]
     }
 
     return scores_dict
@@ -73,7 +74,7 @@ def repeated_holdout(classifier, X, y, k_fold, repeat):
     results_array = np.array(results).T
 
     # Calculate the mean for each metric
-    mean_scores = {metric: np.mean(scores) for metric, scores in zip(['Accuracy', 'Precision', 'Recall', 'F1', 'False Positive Rate', 'True Positive Rate', 'Negative Predictive Value'], results_array)}
+    mean_scores = {metric: np.mean(scores) for metric, scores in zip(['accuracy', 'f1_weighted', 'precision_weighted', 'recall_weighted', 'roc_auc_ovr', 'True Positive Rate', 'False Positive Rate', 'Negative Predictive Value'], results_array)}
 
     return mean_scores
 
