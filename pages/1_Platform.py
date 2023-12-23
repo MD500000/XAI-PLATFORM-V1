@@ -385,8 +385,8 @@ with tab3:
                             df = pd.DataFrame.from_dict(cross_vali, orient='index', columns=['Score'])
                             st.dataframe(df)
 
-                        #if no cross validation or grid search do modelling as normal
-                        if cross_val =='No' or grid_search == 'No':
+                        #if no cross validation and no grid search do modelling as normal
+                        if cross_val =='No' and grid_search == 'No':
                             st.write(f"**{model} Results:**")
                             model_list[model] = modelling.get_model(model).fit(X, y)
                             models_created.append(model)
