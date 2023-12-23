@@ -121,6 +121,14 @@ def get_model(model_name):
 def get_model_param_space(model_name):
     return models_param_space[model_name]
 
+def initialize_model(selected_model):
+    model = models[selected_model]
+    param_space = models_param_space[selected_model]
+
+    return model, param_space
+
+#You can't model any data that has more than 1 variable in this version of the model
+
 # def validate(val_method, model, opt):
 
 #     if val_method == 'Holdout':

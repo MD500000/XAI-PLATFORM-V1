@@ -1,7 +1,9 @@
 from modelling import models, models_param_space
 from sklearn.model_selection import train_test_split, cross_val_score, LeaveOneOut, cross_validate, StratifiedKFold, KFold, RepeatedKFold
 from numpy import mean
+import pandas as pd
 import numpy as np
+import streamlit as st
 from sklearn.metrics import make_scorer
 from sklearn import base
 
@@ -23,7 +25,6 @@ def n_predict_value(y_true, y_pred):
     return (tn)/(tn+fn)
 
 def calc_score(classifier, X, y):
-    scoring_opts = ['accuracy', 'f1_weighted', 'precision_weighted','recall_weighted',"roc_auc_ovr"]
     scores = []
     for scoring_opt in scoring_opts:
         score = cross_val_score(classifier, X, y, scoring=scoring_opt)
@@ -42,73 +43,143 @@ def cross_validation(scorer_param, classifier, X, y):
     rate = np.mean(rate['test_score'])
     return round((rate),3)
 
-def holdout(classifier, X, y, train_size = 0.8):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=train_size)
+def holdout(classifier, X, y, k_fold, repeat):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=k_fold/100, random_state=42)
     classifier.fit(X_train, y_train)
-    return calc_score(classifier, X_test, y_test)
+    scores_tuple = calc_score(classifier, X_test, y_test)
 
-def repeated_holdout(classifier, X, y, num_of_repeats = 3, train_size = 0.8):
-    results = []  
+    scores_dict = {
+        'Accuracy': scores_tuple[0],
+        'Precision': scores_tuple[1],
+        'Recall': scores_tuple[2],
+        'F1': scores_tuple[3],
+        'False Positive Rate': scores_tuple[4],
+        'True Positive Rate': scores_tuple[5],
+        'Negative Predictive Value': scores_tuple[6]
+    }
 
-    for _ in range(num_of_repeats):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=train_size)
+    return scores_dict
+
+def repeated_holdout(classifier, X, y, k_fold, repeat):
+    results = []
+
+    for _ in range(repeat):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=k_fold)
         classifier_cloned = base.clone(classifier)
         classifier_cloned.fit(X_train, y_train)
-        results.append(calc_score(classifier, X_test, y_test))
+        results.append(calc_score(classifier_cloned, X_test, y_test))
 
-    return np.mean(np.array(results),axis = 1)
+    # Transpose the results to get an array with rows corresponding to metrics and columns to repetitions
+    results_array = np.array(results).T
 
-def StratKFoldCV(classifier, X, y, kfold = 3):
+    # Calculate the mean for each metric
+    mean_scores = {metric: np.mean(scores) for metric, scores in zip(['Accuracy', 'Precision', 'Recall', 'F1', 'False Positive Rate', 'True Positive Rate', 'Negative Predictive Value'], results_array)}
+
+    return mean_scores
+
+def StratKFoldCV(classifier, X, y, k_fold, repeat):
     
-    cross_validation = StratifiedKFold(n_splits=kfold)
+    cross_validation = StratifiedKFold(n_splits=k_fold)
 
-    score_fpr = cross_validation(false_positive_rate, classifier, X, y)
-    score_tpr = cross_validation(true_positive_rate, classifier, X, y)
-    score_npv = cross_validation(n_predict_value, classifier, X, y)
+    scores = {}
 
-    return cross_validate(classifier, X, y, cv=cross_validation, scoring=scoring_opts)['test_score'],\
-            score_fpr, score_tpr, score_npv 
+    # Calculate and store scores for each custom metric
+    score_fpr = cross_validate(classifier, X, y, cv=cross_validation, scoring=false_positive_rate)
+    score_tpr = cross_validate(classifier, X, y, cv=cross_validation, scoring=true_positive_rate)
+    score_npv = cross_validate(classifier, X, y, cv=cross_validation, scoring=n_predict_value)
 
-def LeaveOneOutCV(classifier, X, y):
+    scores['False Positive Rate'] = np.mean(score_fpr['test_score'])
+    scores['True Positive Rate'] = np.mean(score_tpr['test_score'])
+    scores['Negative Predictive Value'] = np.mean(score_npv['test_score'])
+
+    # Calculate and store scores for each scoring option
+    for scoring_opt in scoring_opts:
+        accuracy_scores = cross_validate(classifier, X, y, cv=cross_validation, scoring=scoring_opt)
+        test_scores = accuracy_scores['test_score']
+        score = np.mean(test_scores)
+        scores[scoring_opt] = round(score, 3)
+
+    return scores
+
+def LeaveOneOutCV(classifier, X, y, k_fold, repeat):
     
-    loo = LeaveOneOut()
+    cross_validation = LeaveOneOut()
 
-    score_fpr = cross_validation(false_positive_rate, classifier, X, y)
-    score_tpr = cross_validation(true_positive_rate, classifier, X, y)
-    score_npv = cross_validation(n_predict_value, classifier, X, y)
+    scores ={}
 
-    return cross_validate(classifier, X, y, cv=loo, scoring=scoring_opts)['test_score'],\
-            score_fpr, score_tpr, score_npv 
+    score_fpr = cross_validate(classifier, X, y, cv=cross_validation, scoring=false_positive_rate)
+    score_tpr = cross_validate(classifier, X, y, cv=cross_validation, scoring=true_positive_rate)
+    score_npv = cross_validate(classifier, X, y, cv=cross_validation, scoring=n_predict_value)
 
+    scores['False Positive Rate'] = np.mean(score_fpr['test_score'])
+    scores['True Positive Rate'] = np.mean(score_tpr['test_score'])
+    scores['Negative Predictive Value'] = np.mean(score_npv['test_score'])
 
-def KFoldCV(classifier, X, y, kys = 3):
-    
-    loo = KFold(kys)
+    # Calculate and store scores for each scoring option
+    for scoring_opt in scoring_opts:
+        accuracy_scores = cross_validate(classifier, X, y, cv=cross_validation, scoring=scoring_opt)
+        test_scores = accuracy_scores['test_score']
+        score = np.mean(test_scores)
+        scores[scoring_opt] = round(score, 3)
 
-    score_fpr = cross_validation(false_positive_rate, classifier, X, y)
-    score_tpr = cross_validation(true_positive_rate, classifier, X, y)
-    score_npv = cross_validation(n_predict_value, classifier, X, y)
+    return scores
 
-    return cross_validate(classifier, X, y, cv=loo, scoring=scoring_opts)['test_score'],\
-            score_fpr, score_tpr, score_npv 
+def KFoldCV(classifier, X, y, k_fold, repeat):
+  
+    cross_validation = KFold(k_fold)
 
-def RepeatedKFoldCV(classifier, X, y, kysagain=3):
-    
-    loo = RepeatedKFold(kysagain)
+    scores ={}
 
-    score_fpr = cross_validation(false_positive_rate, classifier, X, y)
-    score_tpr = cross_validation(true_positive_rate, classifier, X, y)
-    score_npv = cross_validation(n_predict_value, classifier, X, y)
+    score_fpr = cross_validate(classifier, X, y, cv=cross_validation, scoring=false_positive_rate)
+    score_tpr = cross_validate(classifier, X, y, cv=cross_validation, scoring=true_positive_rate)
+    score_npv = cross_validate(classifier, X, y, cv=cross_validation, scoring=n_predict_value)
 
-    return cross_validate(classifier, X, y, cv=loo, scoring=scoring_opts)['test_score'],\
-            score_fpr, score_tpr, score_npv 
+    scores['False Positive Rate'] = np.mean(score_fpr['test_score'])
+    scores['True Positive Rate'] = np.mean(score_tpr['test_score'])
+    scores['Negative Predictive Value'] = np.mean(score_npv['test_score'])
+
+    # Calculate and store scores for each scoring option
+    for scoring_opt in scoring_opts:
+        accuracy_scores = cross_validate(classifier, X, y, cv=cross_validation, scoring=scoring_opt)
+        test_scores = accuracy_scores['test_score']
+        score = np.mean(test_scores)
+        scores[scoring_opt] = round(score, 3)
+
+    return scores
+
+def RepeatedKFoldCV(classifier, X, y, k_fold, repeat):
+
+    cross_validation = RepeatedKFold(n_splits=k_fold, n_repeats= repeat)
+
+    scores ={}
+
+    score_fpr = cross_validate(classifier, X, y, cv=cross_validation, scoring=false_positive_rate)
+    score_tpr = cross_validate(classifier, X, y, cv=cross_validation, scoring=true_positive_rate)
+    score_npv = cross_validate(classifier, X, y, cv=cross_validation, scoring=n_predict_value)
+
+    scores['False Positive Rate'] = np.mean(score_fpr['test_score'])
+    scores['True Positive Rate'] = np.mean(score_tpr['test_score'])
+    scores['Negative Predictive Value'] = np.mean(score_npv['test_score'])
+
+    # Calculate and store scores for each scoring option
+    for scoring_opt in scoring_opts:
+        accuracy_scores = cross_validate(classifier, X, y, cv=cross_validation, scoring=scoring_opt)
+        test_scores = accuracy_scores['test_score']
+        score = np.mean(test_scores)
+        scores[scoring_opt] = round(score, 3)
+
+    return scores
 
 def classification_function(X, y, model_name):
     classifier = models[model_name]
     classifier.fit(X, y)
     return classifier
 
+def none_valid(classifier, X, y):
+    pass
+
 val_methods = {
+    'None' : none_valid,
     'Holdout': holdout,
     'Repeated Holdout': repeated_holdout,
     'Stratified K-fold Cross Validation': StratKFoldCV,
